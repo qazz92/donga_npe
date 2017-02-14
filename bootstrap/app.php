@@ -27,6 +27,16 @@ $app = new Laravel\Lumen\Application(
 
  $app->withEloquent();
 
+ $app->configure('database');
+
+config(['database.redis'=>
+    [ 'cluster' => env('REDIS_CLUSTER', false),
+        'default' =>
+            [ 'host' => env('REDIS_HOST', '45.77.8.184'),
+                'port' => env('REDIS_PORT', 6379),
+                'database' => env('REDIS_DATABASE', 0),
+                'password' => env('REDIS_PASSWORD', null), ],
+    ]]);
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -82,6 +92,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(LaravelFCM\FCMServiceProvider::class);
+$app->register(\Illuminate\Redis\RedisServiceProvider::class);
 class_alias(\LaravelFCM\Facades\FCM::class, 'FCM');
 class_alias(\LaravelFCM\Facades\FCMGroup::class, 'FCMGroup');
 if (env('APP_DEBUG')) {

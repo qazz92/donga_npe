@@ -80,7 +80,7 @@ class FCMHandler
      * @param string $body
      * @return $this
      */
-    public function notification(string $title = null, string $body = null)
+    public function notification($title = null, $body = null)
     {
         $this->title = $title;
         $this->body = $body;
@@ -161,13 +161,12 @@ class FCMHandler
         // 사용해서 할당된 stdClass 인스턴스를 얻어 오는 것과 같은 개념이다.
         /** @var FCMSender $fcmSender */
         $fcmSender = app('fcm.sender');
-        $notification = ($this->title && $this->body)
-            ? $this->buildNotification() : null;
-
+//        $notification = ($this->title && $this->body)
+//            ? $this->buildNotification() : null;
         return $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
-            $notification,
+            $this->buildNotification($this->title,$this->body),
             $this->buildPayload()
         );
     }
@@ -210,14 +209,14 @@ class FCMHandler
      *
      * @return \LaravelFCM\Message\PayloadNotification
      */
-    protected function buildNotification()
+    protected function buildNotification($title,$body)
     {
         if (array_key_exists('notificationBuilder', $this->cache)) {
             return $this->cache['notificationBuilder'];
         }
 
         $notificationBuilder = new PayloadNotificationBuilder();
-        $notificationBuilder->setTitle()->setBody()->setSound('default');
+        $notificationBuilder->setTitle($title)->setBody($body)->setSound('default');
 
         return $this->cache['notificationBuilder'] = $notificationBuilder->build();
     }
@@ -248,7 +247,7 @@ class FCMHandler
     protected function updateDevices(array $tokens)
     {
         foreach ($tokens as $old => $new) {
-            $device = Device::wherePushServiceId($old)->firstOrFail();
+            $device = Device::where('push_service_id',$old)->firstOrFail();
             $device->push_service_id = $new;
             $device->save();
         }
@@ -264,7 +263,7 @@ class FCMHandler
      */
     protected function deleteDevices(array $tokens) {
         foreach ($tokens as $token) {
-            $device = Device::wherePushServiceId($token)->firstOrFail();
+            $device = Device::where('push_service_id',$token)->firstOrFail();
             $device->delete();
         }
 

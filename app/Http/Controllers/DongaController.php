@@ -8,6 +8,8 @@ use App\TimeTable;
 use Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
+use App\Normal_User;
 
 class DongaController extends Controller
 {
@@ -21,47 +23,37 @@ class DongaController extends Controller
         //
     }
 
-    //
-    public function meal($year,$month,$day){
-        $date =  $year.'/'.$month.'/'.$day;
-        $findMeal = Meal::where('meal_date', '=', $date)->first();
-        if (! $findMeal) {
-            Log::info($date." | 크롤링 시작");
+    // 식단표
+    public function meal(Request $request){
+        $date = $request->input("date");
+        $redisMeal = Redis::get('meal_'.$date);
+        if ($redisMeal == null) {
             $client = new \Goutte\Client();
-            $crawler = $client->request('GET',"http://www.donga.ac.kr/MM_PAGE/SUB007/SUB_007005005.asp?PageCD=007005005&seldate=2017-02-01");
-            $result =  $crawler->filter('div#subContext > table')->eq(0)->filter('tr')
-                ->eq(1)->filter('table.sk01TBL')->eq(1)->
-                filter('table.sk03TBL')->filter('td');
-//        $kyo = $this->explodeResult($result,0);
-//        $student = $this->explodeResult($result,1);
-            $inter = $this->explodeResult($result,7);
-            $bumin_kyo = $this->explodeResult($result,8);
-            $gang = $this->explodeResult($result,9);
-            $resultArr = array(["inter"=>$inter,"bumin_kyo"=>$bumin_kyo,"gang"=>$gang]);
-
-            try{
-                $insertResult = Meal::create(array('meal_date' => $date,'meal_contents'=>$resultArr));
-                return response()->json($insertResult);
+            try {
+                Log::info("crawler");
+                $crawler = $client->request('GET',"http://www.donga.ac.kr/MM_PAGE/SUB007/SUB_007005005.asp?PageCD=007005005&seldate=".$date);
+                $result =  $crawler->filter('div#subContext > table')->eq(0)->filter('tr')
+                    ->eq(1)->filter('table.sk01TBL')->eq(1)->
+                    filter('table.sk03TBL')->filter('td');
+                $inter = $this->returnHtml($result,7);
+                $bumin_kyo = $this->returnHtml($result,8);
+                $gang = $this->returnHtml($result,9);
+                $resultArr = array("inter"=>$inter,"bumin_kyo"=>$bumin_kyo,"gang"=>$gang);
+                Redis::set('meal_'.$date,json_encode($resultArr));
+                return response()->json(array("result_code"=>1,"result_body"=>$resultArr));
             } catch (\Exception $e) {
-                return response()->json(array(["result_code"=>"db_error"]));
+                return response()->json(array("result_code"=>0,"result_body"=>"none"));
             }
-
         } else {
-            Log::info($date." |  db 출력");
-            return response()->json($findMeal);
+            Log::info("REDIS_MEAL");
+            return response()->json(array("result_code"=>1,"result_body"=>json_decode($redisMeal)));
         }
-
-//        echo $dbResult;
     }
-    function explodeResult($result,$index){
-        $result = $result->eq($index)->text();
-        $fixResult =  preg_replace('/\)/', ") $1", $result);
-        $fixResult = str_replace("\n"," ",$fixResult);
-        $fixResult = str_replace("  "," ",$fixResult);
-        $pieces = explode (" ", trim($fixResult));
-        return $pieces;
+    function returnHtml($result,$index){
+        return $result = $result->eq($index)->html();
     }
 
+    // 로그인
     public function dongaUnivLogin(Request $request){
         $user_id = $request->input("stuId");
         $user_pw = $request->input("stuPw");
@@ -71,23 +63,51 @@ class DongaController extends Controller
             'verify' => false,
         ));
         $client->setClient($guzzleClient);
-        $crawlerLogin = $client->request('GET', 'https://student.donga.ac.kr/Login.aspx');
-        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
-        $cookies = $client->getCookieJar()->all();
-        $client->getCookieJar()->set($cookies[0]);
-        $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1');
         try {
-            $name = $crawlerTable->filter('table#Table4 > tr')->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
-            return response()->json(array("name"=>$name));
+            $crawlerLogin = $client->request('GET', 'https://student.donga.ac.kr/Login.aspx');
+            $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+            $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
+            $cookies = $client->getCookieJar()->all();
+            $client->getCookieJar()->set($cookies[0]);
+            $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1');
+            try {
+                $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
+                $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
+                $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
+                $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
+            } catch (\Exception $e){
+                return response()->json(array("result_code"=>0,"result_body"=>"학번/비번을 제대로 입력해주세요"));
+            }
+            $getID = Normal_User::where('stuId','=',$user_id)->get();
+                if ($getID->isEmpty()){
+                    $user = new Normal_User();
+                    try {
+                        $user->stuId = $user_id;
+                        $user->name = $name;
+                        $user->coll = $coll;
+                        $user->major = $major;
+
+                        $result = $user->save();
+                        if ($result){
+                            return response()->json(["result_code"=>1,"result_body"=>$user]);
+                        } else {
+                            return response()->json(["result_code"=>0,"result_body"=>"DB 에러!"]);
+                        }
+                    } catch (\Exception $e){
+                        echo $e;
+                        return response()->json(["result_code"=>0,"result_body"=>"DB 에러!"]);
+                    }
+                } else {
+                    return response()->json(array("result_code"=>1,"result_body"=>$getID));
+                }
         } catch (\Exception $e) {
-            return response()->json(array("name"=>"0"));
+            return response()->json(array("result_code"=>0,"result_body"=>"서버 에러!"));
         }
     }
 
+    //클래스 획득
     public function getEmptyClass()
     {
-        echo "error";
 //        $user_id = "1124305";
 //        $user_pw = "Ekfqlc152!";
 //        $client = new \Goutte\Client();
@@ -150,54 +170,73 @@ class DongaController extends Controller
 
     }
 
+    // 빈강의실
     public function getEmptyRoom(Request $request){
 //        $results = DB::select( DB::raw('SELECT b.room_no as room_no FROM timeTables a LEFT JOIN rooms b ON a.room_id = b.id WHERE a.day=1 AND (a.time BETWEEN 3 and 5) AND a.subject_code=\'빈 강의실\' GROUP BY a.room_id HAVING count(*)=3') );
-        $day = $request->input("day");
-        $from = $request->input("from");
-        $to = $request->input("to");
+        $day = intval($request->input("day"));
+        $from = intval($request->input("from"));
+        $to = intval($request->input("to"));
 
-        $result = DB::table('timeTables')->select(DB::raw('count(*) as count, room_no'))
-            ->leftJoin('rooms', 'room_id', '=', 'rooms.id')
-            ->where('day','=',$day)
-            ->where('subject_code','=','빈 강의실')
-            ->whereBetween('time', [$from, $to])
-            ->groupBy('room_id')
-            ->having('count', '=', ($from-$to+1))
-            ->get();
-        return response()->json(array("result_code"=>"ok","result_body"=>$result));
+        $redisGetEmptyRoom = Redis::get('empty_'.$day.'_'.$from.'_'.$to);
+        if ($redisGetEmptyRoom == null){
+            try {
+                $result = DB::table('timeTables')->select(DB::raw('count(*) as count, room_no'))
+                    ->leftJoin('rooms', 'room_id', '=', 'rooms.id')
+                    ->where('day','=',$day)
+                    ->where('subject_code','=','빈 강의실')
+                    ->whereBetween('time', [$from, $to])
+                    ->groupBy('room_id')
+                    ->having('count', '=', ($to-$from+1))
+                    ->get();
+                Redis::set('empty_'.$day.'_'.$from.'_'.$to,$result);
+                Log::info('empty_'.$day.'_'.$from.'_'.$to.' | REDIS SET');
+                return response()->json(array("result_code"=>1,"result_body"=>$result));
+            } catch (\Exception $e) {
+                return response()->json(array("result_code"=>0,"result_body"=>"none"));
+            }
+        } else {
+            Log::info('empty_'.$day.'_'.$from.'_'.$to.' | REDIS GET');
+            return response()->json(array("result_code"=>1,"result_body"=>json_decode($redisGetEmptyRoom)));
+        }
     }
+
+    // 열람실
     public function getWebSeat(){
         $client = new \Goutte\Client();
-        $crawler = $client->request('GET',"http://168.115.33.207/WebSeat");
-        $crawlerTable = $crawler->filter('table')->eq(1);
-        $arrResult = array();
-        for ($j=12;$j<23;$j++){
-            $temp = array();
-            $row = $crawlerTable->filter('tr')->eq($j);
-            for ($i=0;$i<5;$i++){
-                $result = $row->filter('td')->eq($i)->text();
-                $removeResult = str_replace("\xc2\xa0",'',$result);
-                switch ($i) {
-                    case 0:
-                        $temp["loc"]=$removeResult;
-                        break;
-                    case 1:
-                        $temp["all"]=$removeResult;
-                        break;
-                    case 2:
-                        $temp["use"]=$removeResult;
-                        break;
-                    case 3:
-                        $temp["remain"]=$removeResult;
-                        break;
-                    case 4:
-                        $removeResult = preg_replace('/\s/','',$removeResult);
-                        $temp["util"]=$removeResult;
-                        break;
+        try {
+            $crawler = $client->request('GET',"http://168.115.33.207/WebSeat");
+            $crawlerTable = $crawler->filter('table')->eq(1);
+            $arrResult = array();
+            for ($j=12;$j<23;$j++){
+                $temp = array();
+                $row = $crawlerTable->filter('tr')->eq($j);
+                for ($i=0;$i<5;$i++){
+                    $result = $row->filter('td')->eq($i)->text();
+                    $removeResult = str_replace("\xc2\xa0",'',$result);
+                    switch ($i) {
+                        case 0:
+                            $temp["loc"]=$removeResult;
+                            break;
+                        case 1:
+                            $temp["all"]=$removeResult;
+                            break;
+                        case 2:
+                            $temp["use"]=$removeResult;
+                            break;
+                        case 3:
+                            $temp["remain"]=$removeResult;
+                            break;
+                        case 4:
+                            $removeResult = preg_replace('/\s/','',$removeResult);
+                            $temp["util"]=$removeResult;
+                            break;
+                    }
                 }
+                $arrResult[$j-12] = $temp;
             }
-            $arrResult[$j-12] = $temp;
+            return response()->json(array("result_code"=>1,"result_body"=>$arrResult));
+        } catch (\Exception $e) {
+            return response()->json(array("result_code"=>0,"result_body"=>"none"));
         }
-        return response()->json(array("result_code"=>"ok","result_body"=>$arrResult));
     }
 }

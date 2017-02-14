@@ -2,7 +2,6 @@
 use Illuminate\Http\Request;
 use App\Services\FCMHandler;
 
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -15,44 +14,27 @@ use App\Services\FCMHandler;
 */
 
 $app->get('/', 'MainController@index');
-
-
-
 $app->group(['prefix' => 'donga'], function () use ($app) {
-    $app->get('meal/{year}/{month}/{day}', 'DongaController@meal');
+    $app->get('meal', 'DongaController@meal');
     $app->post('login','DongaController@dongaUnivLogin');
-//    $app->get('empty', 'DongaController@getEmptyClass');
+    $app->get('empty', 'DongaController@getEmptyClass');
     $app->get('empty/room', 'DongaController@getEmptyRoom');
     $app->get('getWebSeat', 'DongaController@getWebSeat');
+    $app->post('async','DongaController@dongaInfoAsync');
 });
-
+$app->group(['prefix' => 'admin'], function () use ($app) {
+    $app->get('/', 'AdminController@getIndex');
+});
+$app->post('/deviceInsert', 'MainController@deviceInsert');
+$app->post('/deviceUpdate', 'MainController@deviceUpdate');
 $app->post('/reg', 'MainController@reg');
+$app->post('/normal_reg', 'MainController@normal_reg');
 
-$app->group(['middleware' => 'auth:api'], function($app)
-{
-    $app->post('/deviceInsert', 'MainController@deviceInsert');
-//    $app->get('/test','MainController@test');
-});
+//$app->group(['middleware' => 'auth:api'], function($app)
+//{
+//    $app->post('/deviceInsert', 'MainController@deviceInsert');
+////    $app->get('/test','MainController@test');
+//});
 
 $app->POST('/auth/login', 'AuthController@loginPost');
-
-$app->get('fcm', function (Request $request, FCMHandler $fcm) {
-    // 푸쉬 메시지를 수신할 단말기의 토큰 목록을 추출한다.
-    $user = $request->user();
-    $to = $user->devices()->pluck('push_service_id')->toArray();
-
-    if (! empty($to)) {
-        // 보낼 내용이 마땅치 않아 로그인한 사용자 모델을 푸쉬 메시지 본몬으로 ㅡㅡ;.
-        $message = array_merge(
-            $user->toArray(),
-            ['foo' => 'bar']
-        );
-
-        // FCMHandler 덕분에 코드는 이렇게 한 줄로 간결해졌다.
-        $fcm->to($to)->notification('title','본문')->data($message)->send();
-    }
-
-    return response()->json([
-        'success' => 'HTTP 요청 처리 완료'
-    ]);
-});
+$app->get('/fcm', 'MainController@fcm');

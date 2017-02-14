@@ -50,8 +50,5 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return [];
     }
 
-    public function devices()
-    {
-        return $this->hasMany(Device::class);
-    }
+
 }

@@ -24,11 +24,11 @@ class CreateDevicesTable extends Migration
             $table->string('push_service_enum')->default('fcm');
             $table->string('push_service_id')->nullable();
             $table->timestamps();
-
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
+//
+//            $table->foreign('user_id')
+//                ->references('id')
+//                ->on('users')
+//                ->onDelete('cascade');
         });
     }
 

@@ -11,7 +11,9 @@
         "tymon/jwt-auth": "1.0.0-beta.2",
         "fabpot/goutte": "^3.2",
         "brozot/laravel-fcm": "^1.2",
-        "barryvdh/laravel-debugbar": "^2.3"
+        "barryvdh/laravel-debugbar": "^2.3",
+        "predis/predis": "v1.1.1",
+        "illuminate/redis": "v5.4.9"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
