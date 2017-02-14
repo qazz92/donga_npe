@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Device;
+use App\Normal_User;
+use App\Noti;
 use App\User;
 use Illuminate\Http\Request;
 use Log;
 use App\Services\FCMHandler;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class MainController extends Controller
 {
@@ -114,14 +118,34 @@ class MainController extends Controller
 
     //fcm push
     public function fcm(Request $request, FCMHandler $fcm){
-        $to = Device::pluck('push_service_id')->toArray();
+        //echo $user->created_at->format('Y-m-d h:i:s');
 
+
+        $to = DB::table('devices')
+            ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
+            ->select('normal_users.id as uid','devices.push_service_id as pid')
+            ->where('normal_users.coll','=','경영대학')
+            ->pluck('pid','uid')->toArray();
+//        $to = Device::pluck('push_service_id','id')->toArray();
         if (! empty($to)) {
             Log::info("start!");
             $message = array_merge(
                 ['contents' => '안녕하세요 포미스 회장 정록헌입니다. 다름이 아니라.....']
             );
-            $fcm->to($to)->notification('title','body')->data($message)->send();
+            $fcm->to(array_values($to))->notification('title','body')->data($message)->send();
+            $path = storage_path('app/');
+            $text = $path.date("Y-m-d h:i:s").'_'.str_random(16).'.txt';
+            $ids = array_keys($to);
+            foreach ($ids as $id){
+                $mytime = Carbon::now();
+                $contents =  $id.'|안녕하세요 포미스 회장 정록헌입니다. 다름이 아니라......|'.$mytime->toDateTimeString().';';
+                file_put_contents($text,$contents,FILE_APPEND);
+            }
+            $query = "LOAD DATA LOCAL INFILE '".$text."'
+            INTO TABLE notis
+            FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
+            (user_id, contents, created_at) SET id = NULL;";
+            DB::connection()->getpdo()->exec($query);
         }
         return response()->json([
             'success' => 'HTTP 요청 처리 완료'

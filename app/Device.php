@@ -19,7 +19,7 @@ class Device extends Model
         'user_id',
     ];
 
-    public function normal_user()
+    public function normal_users()
     {
         return $this->belongsTo(Normal_User::class);
     }
