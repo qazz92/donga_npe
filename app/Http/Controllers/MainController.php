@@ -119,7 +119,7 @@ class MainController extends Controller
         if (! empty($to)) {
             Log::info("start!");
             $message = array_merge(
-                ['foo' => 'bar']
+                ['contents' => '안녕하세요 포미스 회장 정록헌입니다. 다름이 아니라.....']
             );
             $fcm->to($to)->notification('title','body')->data($message)->send();
         }
