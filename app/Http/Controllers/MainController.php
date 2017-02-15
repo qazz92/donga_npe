@@ -130,15 +130,15 @@ class MainController extends Controller
         if (! empty($to)) {
             Log::info("start!");
             $message = array_merge(
-                ['contents' => '안녕하세요 포미스 회장 정록헌입니다. 다름이 아니라.....']
+                ['contents' => 'hi2']
             );
-            $fcm->to(array_values($to))->notification('title','body')->data($message)->send();
+            $fcm->to(array_values($to))->notification('hi5','hi5')->data($message)->send();
             $path = storage_path('app/');
             $text = $path.date("Y-m-d h:i:s").'_'.str_random(16).'.txt';
             $ids = array_keys($to);
             foreach ($ids as $id){
                 $mytime = Carbon::now();
-                $contents =  $id.'|안녕하세요 포미스 회장 정록헌입니다. 다름이 아니라......|'.$mytime->toDateTimeString().';';
+                $contents =  $id.'|testesttest123|'.$mytime->toDateTimeString().';';
                 file_put_contents($text,$contents,FILE_APPEND);
             }
             $query = "LOAD DATA LOCAL INFILE '".$text."'

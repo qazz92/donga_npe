@@ -4,16 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Meal;
 use App\Room;
+use App\Services\CookieImpl;
+use Symfony\Component\BrowserKit\Cookie;
+use App\Services\SingletonChild;
 use App\TimeTable;
-use Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use App\Normal_User;
+use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
+use Log;
 
 class DongaController extends Controller
 {
     /**
+
      * Create a new controller instance.
      *
      * @return void
@@ -101,7 +107,7 @@ class DongaController extends Controller
                     return response()->json(array("result_code"=>1,"result_body"=>$getID));
                 }
         } catch (\Exception $e) {
-            return response()->json(array("result_code"=>0,"result_body"=>"서버 에러!"));
+            return response()->json(array("result_code"=>500));
         }
     }
 
@@ -227,7 +233,7 @@ class DongaController extends Controller
                             $temp["remain"]=$removeResult;
                             break;
                         case 4:
-                            $removeResult = preg_replace('/\s/','',$removeResult);
+                            $removeResult = preg_replace('/\s+%/','',$removeResult);
                             $temp["util"]=$removeResult;
                             break;
                     }
@@ -237,6 +243,192 @@ class DongaController extends Controller
             return response()->json(array("result_code"=>1,"result_body"=>$arrResult));
         } catch (\Exception $e) {
             return response()->json(array("result_code"=>0,"result_body"=>"none"));
+        }
+    }
+    function getDongaPage($userID,$userPW,$loginPage,$targetPage){
+        $user_id = $userID;
+        $user_pw = $userPW;
+        try {
+            $client = new \Goutte\Client();
+            $guzzleClient = new \GuzzleHttp\Client(array(
+                'timeout' => 90,
+                'verify' => false,
+            ));
+            $client->setClient($guzzleClient);
+            $loginCached = Cache::get('login_'.$user_id);
+            $set = CookieImpl::getInstance();
+            if($loginCached == null){
+                Log::info("LOGIN CRA");
+                $crawlerLogin = $client->request('GET', $loginPage);
+                $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+                $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
+                $cookies = $client->getCookieJar()->all();
+                $client->getCookieJar()->set($cookies[0]);
+                $expiresAt = Carbon::now()->addMinutes(10);
+                Cache::put('login_'.$user_id, 'ok', $expiresAt);
+                $set->setCookie($cookies[0]);
+                $crawlerTable = $client->request('GET', $targetPage);
+            }else {
+                Log::info("LOGIN CACHED ".$loginCached);
+                $client->getCookieJar()->set(Cookie::fromString($set->getCookie()));
+                $crawlerTable = $client->request('GET', $targetPage);
+                Log::info($crawlerTable->getUri());
+            }
+            if (! strcmp($targetPage,$crawlerTable->getUri())){
+                return array('result_code'=>1,'result_body'=>$crawlerTable);
+            } else {
+                return array('result_code'=>0);
+            }
+        } catch (\Exception $e){
+            return array('result_code'=>500);
+        }
+    }
+    public function getGraduated(Request $request){
+        $user_id = $request->input("stuId");
+        $user_pw = $request->input("stuPw");
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $targetPage = 'https://student.donga.ac.kr/Univ/SUI/SSUI0050.aspx?m=7';
+        $page = $this->getDongaPage($user_id,$user_pw,$loginPage,$targetPage);
+        if ($page["result_code"] === 0){
+            return response()->json(array('result_code'=>$page["result_code"]));
+        } else {
+            $cached = Cache::get('getGraduated_'.$user_id);
+            if (!$cached==null){
+                Log::info('GRA CACHE');
+                return response()->json($cached);
+            } else {
+                Log::info('GRA CRAWLER');
+                try {
+                    $keys = array('multi','sub','rel','year','avgGrade','early','smart');
+                    $values = array();
+                    $title = array();
+                    $title2 = array();
+                    $need = array();
+                    $get = array();
+                    $pm = array();
+                    $page["result_body"]->filter('table#dListEtcInfo')->filter('table.xTBL1')->filter('tr')->filter('td')->each(function ($node,$i) use (&$keys,&$values) {
+
+                        switch ($i % 2){
+                            case 1:
+                                if (strcmp($node->text() , "")){
+                                    $values[] = $node->text();
+                                } else {
+                                    $values[] = '없음';
+                                }
+                                break;
+                        }
+
+                    });
+                    $page["result_body"]->filter('table#printtable')
+                        ->filter('tr')->filter('table.xTBL1')->eq(1)
+                        ->filter('tr')->filter('td')->each(function ($node,$i) use (&$title,&$title2,&$need,&$get,&$pm) {
+                            if ($i<6){
+                                $title[] = trim($node->text());
+                            } elseif (6<=$i && $i<15){
+                                $title2[] = trim($node->text());
+                            } elseif (15<=$i && $i<27){
+                                $need[] = trim($node->text());
+                            } elseif (27<=$i && $i<39) {
+                                $get[] = trim($node->text());
+                            } elseif(39<=$i) {
+                                $pm[] = trim($node->text());
+                            }
+                        });
+                    $info = array_combine($keys, $values);
+                    $result = array('result_code'=>1,'result_body'=>array('info'=>$info,'title'=>$title,'title2'=>$title2,'need'=>$need,
+                        'get'=>$get,'pm'=>$pm));
+                    $expiresAt = Carbon::now()->addMinutes(60);
+                    Cache::put('getGraduated_'.$user_id, $result, $expiresAt);
+                    return response()->json($result);
+                } catch (\Exception $e){
+                    return response()->json(array('result_code'=>500));
+                }
+
+            }
+        }
+    }
+    public function getAllGrade(Request $request){
+        $user_id = $request->input("stuId");
+        $user_pw = $request->input("stuPw");
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6';
+        $page = $this->getDongaPage($user_id,$user_pw,$loginPage,$targetPage);
+        if ($page["result_code"] === 0){
+            return response()->json(array('result_code'=>$page["result_code"]));
+        } else {
+            $cached = Cache::get('getAllGrade_'.$user_id);
+            if (!$cached==null){
+                Log::info('ALL CACHE');
+                return response()->json($cached);
+            } else {
+                Log::info('ALL CRAWLER');
+
+                try {
+                    $label = $page["result_body"]->filter('td.td6')->eq(2);
+                    $getAllGrade = $label->filter('span#lblCdtPass')->text();
+                    $getAvgGrade = $label->filter('span#lblGpa')->text();
+                    $arr = array();
+                    $label->filter('table')->eq(2)->filter('tr')->filter('td')->each(function ($node,$i) use (&$arr){
+                        if (strcmp($node->text() , "")){
+                            $arr[] = $node->text();
+//                            echo $i.'. '.$node->text()."<br/>";
+                        } else {
+                            $arr[] = '';
+//                            echo $i.'. '.'상동'."<br/>";
+                        }
+                    });
+                    $chArr = array_chunk($arr,8);
+                    $result = array('result_code'=>1,'result_body'=>array('allGrade'=>$getAllGrade,'avgGrade'=>$getAvgGrade,'detail'=>$chArr));
+                    $expiresAt = Carbon::now()->addMinutes(60);
+                    Cache::put('getAllGrade_'.$user_id, $result, $expiresAt);
+                    return response()->json($result);
+                } catch (\Exception $e){
+                    return response()->json(array('result_code'=>500));
+                }
+
+            }
+        }
+    }
+    public function getSpeGrade(Request $request){
+        $user_id = $request->input("stuId");
+        $user_pw = $request->input("stuPw");
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6';
+        $page = $this->getDongaPage($user_id,$user_pw,$loginPage,$targetPage);
+        if ($page["result_code"] === 0){
+            return response()->json(array('result_code'=>$page["result_code"]));
+        } else {
+            $cached = Cache::get('getSpeGrade_'.$user_id);
+            if (!$cached==null){
+                Log::info('CACHE');
+                return response()->json($cached);
+            } else {
+                Log::info('CRAWLER');
+
+                try {
+                    $label = $page["result_body"]->filter('td.td6')->eq(2);
+                    $getAllGrade = $label->filter('span#lblCdtPass')->text();
+                    $getAvgGrade = $label->filter('span#lblGpa')->text();
+                    $arr = array();
+                    $label->filter('table')->eq(2)->filter('tr')->filter('td')->each(function ($node,$i) use (&$arr){
+                        if (strcmp($node->text() , "")){
+                            $arr[] = $node->text();
+//                            echo $i.'. '.$node->text()."<br/>";
+                        } else {
+                            $arr[] = '';
+//                            echo $i.'. '.'상동'."<br/>";
+                        }
+                    });
+                    $chArr = array_chunk($arr,8);
+                    $result = array('result_code'=>1,'result_body'=>array('allGrade'=>$getAllGrade,'avgGrade'=>$getAvgGrade,'detail'=>$chArr));
+                    $expiresAt = Carbon::now()->addMinutes(60);
+                    Cache::put('getSpeGrade_'.$user_id, $result, $expiresAt);
+                    return response()->json($result);
+                } catch (\Exception $e){
+                    return response()->json(array('result_code'=>500));
+                }
+
+            }
         }
     }
 }
