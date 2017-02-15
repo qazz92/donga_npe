@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Meal;
-use App\Room;
 use App\Services\GetDonga;
-use App\TimeTable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
