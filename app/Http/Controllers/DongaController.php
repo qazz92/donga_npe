@@ -57,7 +57,6 @@ class DongaController extends Controller
     function returnHtml($result,$index){
         return $result = $result->eq($index)->html();
     }
-
     public function dongaUnivLogin(Request $request, GetDonga $getDonga) {
         $result = $getDonga->getUserInfo($request)->getDongaPage();
         if ($result["result_code"]==1){
