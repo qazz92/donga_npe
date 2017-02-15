@@ -21,7 +21,7 @@ $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('empty/room', 'DongaController@getEmptyRoom');
     $app->get('getWebSeat', 'DongaController@getWebSeat');
     $app->post('getGraduated','DongaController@getGraduated');
-    $app->get('getAllGrade','DongaController@getAllGrade');
+    $app->post('getAllGrade','DongaController@getAllGrade');
     $app->post('getSpeGrade','DongaController@getSpeGrade');
 });
 $app->group(['prefix' => 'admin'], function () use ($app) {
