@@ -233,7 +233,7 @@ class DongaController extends Controller
                             $temp["remain"]=$removeResult;
                             break;
                         case 4:
-                            $removeResult = preg_replace('/\s+%/','',$removeResult);
+                            $removeResult = preg_replace('/^\s+|\s+%/','',$removeResult);
                             $temp["util"]=$removeResult;
                             break;
                     }
