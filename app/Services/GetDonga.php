@@ -1,8 +1,7 @@
 <?php
 namespace App\Services;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
+use Log;
 
 class GetDonga {
     private $user_id;
@@ -29,12 +28,10 @@ class GetDonga {
             $client->setClient($guzzleClient);
             $crawlerLogin = $client->request('GET', $loginPage);
             $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-            $crawler = $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
-            $cookies = $client->getCookieJar()->all();
-            $client->getCookieJar()->set($cookies[0]);
+            $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
             return array('result_code'=>1,'client'=>$client,'user_id'=>$this->user_id);
             } catch (\Exception $e){
-                return array('result_code'=>500);
+            return array('result_code'=>500);
             }
     }
     public function getGrade($crawlerTable,$chunk){

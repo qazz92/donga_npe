@@ -17,8 +17,6 @@ use Log;
 class DongaController extends Controller
 {
     protected $set;
-
-    private $exTime;
     /**
 
      * Create a new controller instance.
@@ -68,6 +66,7 @@ class DongaController extends Controller
             $client = $result["client"];
 
             $crawlerTable = $client->request('GET', $targetPage);
+            Log::info('URI : '.$crawlerTable->getUri());
             $infoTable = $crawlerTable ->filter('table#Table4')->filter('tr');
             $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
             $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
