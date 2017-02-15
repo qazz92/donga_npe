@@ -229,22 +229,23 @@ class DongaController extends Controller
             $targetPage = 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx';
             $client = $result["client"];
             $user_id = $result["user_id"];
-            $crawlerTable = $client->request('GET', $targetPage);
-            $arr = array();
-//            for ($j=3;$j<31;$j++){
-//                $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->each(function ($node,$i) use (&$result,&$j){
-//                    if ($i>0){
-//                        $result[$j][] = $node->text().$i."아마도여기?";
-//                    }
-//                });
-//            }
-            $mon = $getDonga->getTimetableLoop("mon",$crawlerTable);
-            $tue = $getDonga->getTimetableLoop("tue",$crawlerTable);
-            $wen= $getDonga->getTimetableLoop("wen",$crawlerTable);
-            $thu = $getDonga->getTimetableLoop("thu",$crawlerTable);
-            $fri = $getDonga->getTimetableLoop("fri",$crawlerTable);
-
-            return response()->json(array('result_code'=>1,'result_body'=>array($mon,$tue,$wen,$thu,$fri)));
+            $cached = Cache::get('getTimeTable_'.$user_id);
+            if ($cached == null){
+                Log::info('TT CRA');
+                $crawlerTable = $client->request('GET', $targetPage);
+                $mon = $getDonga->getTimetableLoop("mon",$crawlerTable);
+                $tue = $getDonga->getTimetableLoop("tue",$crawlerTable);
+                $wen= $getDonga->getTimetableLoop("wen",$crawlerTable);
+                $thu = $getDonga->getTimetableLoop("thu",$crawlerTable);
+                $fri = $getDonga->getTimetableLoop("fri",$crawlerTable);
+                $arr = array($mon,$tue,$wen,$thu,$fri);
+                $expiresAt = Carbon::now()->addMinutes(60);
+                Cache::put('getTimeTable_'.$user_id, $arr, $expiresAt);
+                return response()->json(array('result_code'=>1,'result_body'=>$arr));
+            } else {
+                Log::info('TT CACHE');
+                return response()->json(array('result_code'=>1,'result_body'=>$cached));
+            }
         }else {
             return response()->json(["result_code"=>$result["result_code"]]);
         }
