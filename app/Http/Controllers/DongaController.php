@@ -133,7 +133,11 @@ class DongaController extends Controller
                         ->filter('tr')->filter('table.xTBL1')->eq(1)
                         ->filter('tr')->filter('td')->each(function ($node,$i) use (&$title,&$title2,&$need,&$get,&$pm) {
                             if ($i<6){
-                                $title[] = trim($node->text());
+                                if ($i===4){
+                                    $title[] = preg_split('/\\r\\n\s+/',trim($node->text()))[0];
+                                } else {
+                                    $title[] = trim($node->text());
+                                }
                             } elseif (6<=$i && $i<15){
                                 $title2[] = trim($node->text());
                             } elseif (15<=$i && $i<27){
