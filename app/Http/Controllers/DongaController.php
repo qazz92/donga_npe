@@ -58,7 +58,8 @@ class DongaController extends Controller
         return $result = $result->eq($index)->html();
     }
     public function dongaUnivLogin(Request $request, GetDonga $getDonga) {
-        $result = $getDonga->getUserInfo($request)->getDongaPage();
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"]==1){
             $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
             $user_id = $result["user_id"];
@@ -96,7 +97,8 @@ class DongaController extends Controller
         }
     }
     public function getGraduated(Request $request, GetDonga $getDonga){
-        $result = $getDonga->getUserInfo($request)->getDongaPage();
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"]==1){
             $targetPage = 'https://student.donga.ac.kr/Univ/SUI/SSUI0050.aspx?m=7';
             $user_id = $result["user_id"];
@@ -163,7 +165,8 @@ class DongaController extends Controller
         }
     }
     public function getAllGrade(Request $request, GetDonga $getDonga){
-        $result = $getDonga->getUserInfo($request)->getDongaPage();
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"]==1){
             $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6';
             $user_id = $result["user_id"];
@@ -190,7 +193,8 @@ class DongaController extends Controller
         }
     }
     function getSpeGrade(Request $request,GetDonga $getDonga){
-        $result = $getDonga->getUserInfo($request)->getDongaPage();
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"]==1){
             $year = $request->input('year');
             $smt = $request->input('smt');
@@ -218,77 +222,33 @@ class DongaController extends Controller
         }
 
     }
-
-    // 로그인
-//    public function dongaUnivLogin(Request $request){
-//        $user_id = $request->input("stuId");
-//        $user_pw = $request->input("stuPw");
-//        $client = new \Goutte\Client();
-//        $guzzleClient = new \GuzzleHttp\Client(array(
-//            'timeout' => 90,
-//            'verify' => false,
-//        ));
-//        $client->setClient($guzzleClient);
-//        $loginCached = Cache::get('login_'.$user_id);
-//        $set = CookieImpl::getInstance();
-//
-//        if ($loginCached == null ){
-//            try {
-//            Log::info("LOGIN CRA");
-//            $crawlerLogin = $client->request('GET', 'https://student.donga.ac.kr/Login.aspx');
-//            $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-//            $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
-//            $cookies = $client->getCookieJar()->all();
-//            $client->getCookieJar()->set($cookies[0]);
-//            $expiresAt = Carbon::now()->addMinutes(10);
-//            Cache::put('login_'.$user_id, 'ok', $expiresAt);
-//            $set->setCookie($cookies[0]);
-//            $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1');
-//            } catch (\Exception $e) {
-//                return response()->json(array("result_code"=>500));
-//            }
-//        } else {
-//            try {
-//                $client->getCookieJar()->set($set->getCookie());
-//                $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1');
-//            } catch (\Exception $e) {
-//                return response()->json(array("result_code"=>500));
-//            }
-//        }
-//
-//
-//            try {
-//                $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
-//                $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
-//                $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
-//                $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
-//            } catch (\Exception $e){
-//                return response()->json(array("result_code"=>0,"result_body"=>"학번/비번을 제대로 입력해주세요"));
-//            }
-//            $getID = Normal_User::where('stuId','=',$user_id)->get();
-//            if ($getID->isEmpty()){
-//                $user = new Normal_User();
-//                try {
-//                    $user->stuId = $user_id;
-//                    $user->name = $name;
-//                    $user->coll = $coll;
-//                    $user->major = $major;
-//
-//                    $result = $user->save();
-//                    if ($result){
-//                        return response()->json(["result_code"=>1,"result_body"=>$user]);
-//                    } else {
-//                        return response()->json(["result_code"=>0,"result_body"=>"DB 에러!"]);
+    public function getTimeTable(Request $request,GetDonga $getDonga){
+        $loginPage = 'https://sugang.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
+        if ($result["result_code"]==1){
+            $targetPage = 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx';
+            $client = $result["client"];
+            $user_id = $result["user_id"];
+            $crawlerTable = $client->request('GET', $targetPage);
+            $arr = array();
+//            for ($j=3;$j<31;$j++){
+//                $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->each(function ($node,$i) use (&$result,&$j){
+//                    if ($i>0){
+//                        $result[$j][] = $node->text().$i."아마도여기?";
 //                    }
-//                } catch (\Exception $e){
-//                    echo $e;
-//                    return response()->json(["result_code"=>0,"result_body"=>"DB 에러!"]);
-//                }
-//            } else {
-//                return response()->json(array("result_code"=>1,"result_body"=>$getID));
+//                });
 //            }
-//
-//    }
+            $mon = $getDonga->getTimetableLoop("mon",$crawlerTable);
+            $tue = $getDonga->getTimetableLoop("tue",$crawlerTable);
+            $wen= $getDonga->getTimetableLoop("wen",$crawlerTable);
+            $thu = $getDonga->getTimetableLoop("thu",$crawlerTable);
+            $fri = $getDonga->getTimetableLoop("fri",$crawlerTable);
+
+            return response()->json(array('result_code'=>1,'result_body'=>array($mon,$tue,$wen,$thu,$fri)));
+        }else {
+            return response()->json(["result_code"=>$result["result_code"]]);
+        }
+    }
 
     //클래스 획득
     public function getEmptyClass()

@@ -17,8 +17,7 @@ class GetDonga {
         return $this;
     }
 
-    public function getDongaPage(){
-        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+    public function getDongaPage($loginPage){
         try {
             $client = new \Goutte\Client();
             $guzzleClient = new \GuzzleHttp\Client(array(
@@ -48,6 +47,13 @@ class GetDonga {
         });
         $chArr = array_chunk($arr,$chunk);
         $result = array('result_code'=>1,'result_body'=>array('allGrade'=>$getAllGrade,'avgGrade'=>$getAvgGrade,'detail'=>$chArr));
+        return $result;
+    }
+    public function getTimetableLoop($day,$crawlerTable){
+        $result = array();
+        for ($j=3;$j<31;$j++){
+            $result[$day][] = $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->eq(1)->text().$j.'. 아마도 '.$day;
+        }
         return $result;
     }
 }
