@@ -23,7 +23,7 @@ $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->post('getGraduated','DongaController@getGraduated');
     $app->post('getAllGrade','DongaController@getAllGrade');
     $app->post('getSpeGrade','DongaController@getSpeGrade');
-    $app->get('getTimeTable','DongaController@getTimeTable');
+    $app->post('getTimeTable','DongaController@getTimeTable');
 });
 $app->group(['prefix' => 'admin'], function () use ($app) {
     $app->get('/', 'AdminController@getIndex');
