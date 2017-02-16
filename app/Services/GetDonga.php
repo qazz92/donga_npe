@@ -2,7 +2,9 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Log;
+use Carbon\Carbon;
 
 class GetDonga
 {
@@ -20,21 +22,52 @@ class GetDonga
         return $this;
     }
 
-    public function getDongaPage($loginPage)
+    public function getDongaPage($loginPage,$dis)
     {
-        try {
+        $cacehd = Cache::get('login_'.$dis.'_'.$this->user_id);
+        if ($cacehd == null){
+            try {
+                $client = new \Goutte\Client();
+                $guzzleClient = new \GuzzleHttp\Client(array(
+                    'timeout' => 90,
+                    'verify' => false,
+                ));
+                $client->setClient($guzzleClient);
+                $crawlerLogin = $client->request('GET', $loginPage);
+                $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+                $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
+                $cookie  = $client->getCookieJar()->get('.ASPXAUTH');
+                $expiresAt = Carbon::now()->addMinutes(20);
+                $authCookie = explode(';',$cookie)[0];
+                $domain = explode(';',$cookie)[1];
+                Log::info($cookie);
+                Cache::put('login_'.$dis.'_'.$this->user_id, array('authCookie'=>explode('=',$authCookie)[1],'domain'=>explode('=',$domain)[1]), $expiresAt);
+                return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
+            } catch (\Exception $e) {
+                echo $e;
+//                return array('result_code' => 500);
+            }
+        }
+        else {
+            Log::info('dongaPage REDIS');
+            $cookieJar = new \GuzzleHttp\Cookie\CookieJar(true);
+
+            $cookieJar->setCookie(new \GuzzleHttp\Cookie\SetCookie([
+                'Domain'  => $cacehd["domain"],
+                'Name'    => '.ASPXAUTH',
+                'Value'   => $cacehd["authCookie"],
+                'Discard' => true
+            ]));
+
             $client = new \Goutte\Client();
-            $guzzleClient = new \GuzzleHttp\Client(array(
+            $guzzleclient = new \GuzzleHttp\Client([
                 'timeout' => 90,
                 'verify' => false,
-            ));
-            $client->setClient($guzzleClient);
-            $crawlerLogin = $client->request('GET', $loginPage);
-            $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-            $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
+                'cookies' => $cookieJar
+            ]);
+            $client->setClient($guzzleclient);
+
             return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
-        } catch (\Exception $e) {
-            return array('result_code' => 500);
         }
     }
 
