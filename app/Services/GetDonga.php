@@ -22,54 +22,84 @@ class GetDonga
         return $this;
     }
 
-    public function getDongaPage($loginPage,$dis)
+    public function getDongaPage($loginPage, $dis)
     {
-        $cacehd = Cache::get('login_'.$dis.'_'.$this->user_id);
-        if ($cacehd == null){
-            try {
-                $client = new \Goutte\Client();
-                $guzzleClient = new \GuzzleHttp\Client(array(
-                    'timeout' => 90,
-                    'verify' => false,
-                ));
-                $client->setClient($guzzleClient);
-                $crawlerLogin = $client->request('GET', $loginPage);
-                $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-                $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
-                $cookie  = $client->getCookieJar()->get('.ASPXAUTH');
-                $expiresAt = Carbon::now()->addMinutes(20);
-                $authCookie = explode(';',$cookie)[0];
-                $domain = explode(';',$cookie)[1];
-                Log::info($cookie);
-                Cache::put('login_'.$dis.'_'.$this->user_id, array('authCookie'=>explode('=',$authCookie)[1],'domain'=>explode('=',$domain)[1]), $expiresAt);
-                return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
-            } catch (\Exception $e) {
-                echo $e;
-//                return array('result_code' => 500);
-            }
-        }
-        else {
-            Log::info('dongaPage REDIS');
-            $cookieJar = new \GuzzleHttp\Cookie\CookieJar(true);
-
-            $cookieJar->setCookie(new \GuzzleHttp\Cookie\SetCookie([
-                'Domain'  => $cacehd["domain"],
-                'Name'    => '.ASPXAUTH',
-                'Value'   => $cacehd["authCookie"],
-                'Discard' => true
-            ]));
-
+        try {
             $client = new \Goutte\Client();
-            $guzzleclient = new \GuzzleHttp\Client([
+            $guzzleClient = new \GuzzleHttp\Client(array(
                 'timeout' => 90,
                 'verify' => false,
-                'cookies' => $cookieJar
-            ]);
-            $client->setClient($guzzleclient);
-
+            ));
+            $client->setClient($guzzleClient);
+            $crawlerLogin = $client->request('GET', $loginPage);
+            $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+            $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
             return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
+        } catch (\Exception $e) {
+            return array('result_code' => 500);
         }
     }
+//    public function getDongaPage($loginPage,$dis)
+//    {
+//        $cacehd = Cache::get('login_'.$dis.'_'.$this->user_id);
+//        if ($cacehd == null){
+//            try {
+//                $client = new \Goutte\Client();
+//                $guzzleClient = new \GuzzleHttp\Client(array(
+//                    'timeout' => 90,
+//                    'verify' => false,
+//                ));
+//                $client->setClient($guzzleClient);
+//                $crawlerLogin = $client->request('GET', $loginPage);
+//                $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+//                $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
+//                $cookie  = $client->getCookieJar()->get('.ASPXAUTH');
+//                $expiresAt = Carbon::now()->addMinutes(20);
+//                $authCookie = explode(';',$cookie)[0];
+//                $domain = explode(';',$cookie)[1];
+//                $name = $client->getCookieJar()->get('sName');
+//                $nameCookie = explode(';',$name)[0];
+//                Log::info(explode('=',$nameCookie)[1]);
+//                Cache::put('login_'.$dis.'_'.$this->user_id, array('authCookie'=>explode('=',$authCookie)[1],'sName'=>explode('=',$nameCookie)[1],'domain'=>explode('=',$domain)[1]), $expiresAt);
+//                return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
+//            } catch (\Exception $e) {
+//                echo $e;
+////                return array('result_code' => 500);
+//            }
+//        }
+//        else {
+//            Log::info('dongaPage REDIS');
+//            $cookieJar1= new \GuzzleHttp\Cookie\CookieJar(true);
+//            $cookieJar2= new \GuzzleHttp\Cookie\CookieJar(true);
+//            $cookieJar1->setCookie(new \GuzzleHttp\Cookie\SetCookie(
+//                [
+//                    'Domain'  => $cacehd["domain"],
+//                    'Name'    => 'sName',
+//                    'Value'   => $cacehd["sName"],
+//                    'Discard' => true
+//                ]
+//            ));
+//            $cookieJar2->setCookie(new \GuzzleHttp\Cookie\SetCookie(
+//                [
+//                    'Domain'  => $cacehd["domain"],
+//                    'Name'    => '.ASPXAUTH',
+//                    'Value'   => $cacehd["authCookie"],
+//                    'Discard' => true
+//                ]
+//            ));
+//
+//
+//            $client = new \Goutte\Client();
+//            $guzzleclient = new \GuzzleHttp\Client([
+//                'timeout' => 90,
+//                'verify' => false,
+//                'cookies' => $cookieJar1,$cookieJar2
+//            ]);
+//            $client->setClient($guzzleclient);
+////            var_dump($client);
+//            return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
+//        }
+//    }
 
     public function getGrade($crawlerTable, $chunk)
     {
