@@ -22,7 +22,7 @@ class GetDonga
         return $this;
     }
 
-    public function getDongaPage($loginPage, $dis)
+    public function getDongaPage($loginPage,$dis)
     {
         try {
             $client = new \Goutte\Client();
@@ -70,7 +70,6 @@ class GetDonga
 //        else {
 //            Log::info('dongaPage REDIS');
 //            $cookieJar1= new \GuzzleHttp\Cookie\CookieJar(true);
-//            $cookieJar2= new \GuzzleHttp\Cookie\CookieJar(true);
 //            $cookieJar1->setCookie(new \GuzzleHttp\Cookie\SetCookie(
 //                [
 //                    'Domain'  => $cacehd["domain"],
@@ -79,7 +78,7 @@ class GetDonga
 //                    'Discard' => true
 //                ]
 //            ));
-//            $cookieJar2->setCookie(new \GuzzleHttp\Cookie\SetCookie(
+//            $cookieJar1->setCookie(new \GuzzleHttp\Cookie\SetCookie(
 //                [
 //                    'Domain'  => $cacehd["domain"],
 //                    'Name'    => '.ASPXAUTH',
@@ -87,17 +86,15 @@ class GetDonga
 //                    'Discard' => true
 //                ]
 //            ));
-//
-//
 //            $client = new \Goutte\Client();
 //            $guzzleclient = new \GuzzleHttp\Client([
 //                'timeout' => 90,
 //                'verify' => false,
-//                'cookies' => $cookieJar1,$cookieJar2
+//                'cookies' => $cookieJar1
 //            ]);
 //            $client->setClient($guzzleclient);
-////            var_dump($client);
-//            return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
+//            var_dump($client);
+////            return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
 //        }
 //    }
 
