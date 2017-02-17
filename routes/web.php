@@ -37,7 +37,7 @@ $app->post('/normal_reg', 'MainController@normal_reg');
 
 $app->group(['middleware' => 'auth:api'], function($app)
 {
-    $app->get('/fcm', 'MainController@fcm');
+    $app->post('/fcm', 'MainController@fcm');
 });
 
 $app->POST('/auth/login', 'AuthController@loginPost');
