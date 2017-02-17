@@ -405,12 +405,12 @@ class DongaController extends Controller
     }
 
     public function getPro(Request $request){
-        $redisPro = Redis::get('professor_list');
+        $major = $request->input('major');
+        $redisPro = Redis::get('professor_list_'.$major);
         if ($redisPro == null){
-            $major = $request->input('major');
             try {
                 $result = Professor::where('major',trim($major))->get();
-                Redis::set('professor_list',$result);
+                Redis::set('professor_list_'.$major,$result);
                 return response()->json(['result_code'=>1,'result_body'=>$result]);
             } catch (\Exception $e) {
                 return response()->json(['result_code'=>0]);
