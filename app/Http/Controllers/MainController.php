@@ -42,6 +42,7 @@ class MainController extends Controller
                 $user = new User();
                 $user->email = $email;
                 $user->password = app('hash')->make($pw);
+                $user->user_id = 3;
                 $result = $user->save();
                 if ($result) {
                     return response()->json(["result_code" => $identi_ok]);
@@ -169,5 +170,8 @@ class MainController extends Controller
         return response()->json([
             'success' => 'HTTP 요청 처리 완료'
         ]);
+    }
+    public function privacy(){
+        return view('privacy');
     }
 }

@@ -14,6 +14,7 @@ use App\Services\FCMHandler;
 */
 
 $app->get('/', 'MainController@index');
+$app->get('/privacy', 'MainController@privacy');
 $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('meal', 'DongaController@meal');
     $app->post('login','DongaController@dongaUnivLogin');
