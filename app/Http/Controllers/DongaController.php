@@ -239,7 +239,7 @@ class DongaController extends Controller
     public function getTimeTable(Request $request, GetDonga $getDonga)
     {
         $dis = 'sugang';
-        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $loginPage = 'https://sugang.donga.ac.kr/login.aspx';
         $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
         if ($result["result_code"] == 1) {
             $targetPage = 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx';
