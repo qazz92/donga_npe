@@ -61,9 +61,8 @@ class DongaController extends Controller
 
     public function dongaUnivLogin(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
         $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"] == 1) {
             $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
             $user_id = $result["user_id"];
@@ -103,9 +102,8 @@ class DongaController extends Controller
 
     public function getGraduated(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
         $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"] == 1) {
             $targetPage = 'https://student.donga.ac.kr/Univ/SUI/SSUI0050.aspx?m=7';
             $user_id = $result["user_id"];
@@ -174,9 +172,8 @@ class DongaController extends Controller
 
     public function getAllGrade(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
         $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"] == 1) {
             $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6';
             $user_id = $result["user_id"];
@@ -205,9 +202,8 @@ class DongaController extends Controller
 
     function getSpeGrade(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
         $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"] == 1) {
             $year = $request->input('year');
             $smt = $request->input('smt');
@@ -238,9 +234,8 @@ class DongaController extends Controller
 
     public function getTimeTable(Request $request, GetDonga $getDonga)
     {
-        $dis = 'sugang';
-        $loginPage = 'https://sugang.donga.ac.kr/login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"] == 1) {
             $targetPage = 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx';
             $client = $result["client"];
