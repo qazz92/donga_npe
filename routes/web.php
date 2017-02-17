@@ -17,7 +17,7 @@ $app->get('/', 'MainController@index');
 $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('meal', 'DongaController@meal');
     $app->post('login','DongaController@dongaUnivLogin');
-    $app->get('empty', 'DongaController@getEmptyClass');
+//    $app->get('empty', 'DongaController@getEmptyClass');
     $app->get('empty/room', 'DongaController@getEmptyRoom');
     $app->get('getWebSeat', 'DongaController@getWebSeat');
     $app->post('getGraduated','DongaController@getGraduated');
@@ -25,6 +25,7 @@ $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->post('getSpeGrade','DongaController@getSpeGrade');
     $app->post('getTimeTable','DongaController@getTimeTable');
     $app->get('getPro', 'DongaController@getPro');
+    $app->get('setCircle','DongaController@setCircle');
 });
 $app->group(['prefix' => 'admin'], function () use ($app) {
     $app->get('/', 'AdminController@getIndex');
@@ -34,11 +35,10 @@ $app->post('/deviceUpdate', 'MainController@deviceUpdate');
 $app->post('/reg', 'MainController@reg');
 $app->post('/normal_reg', 'MainController@normal_reg');
 
-//$app->group(['middleware' => 'auth:api'], function($app)
-//{
-//    $app->post('/deviceInsert', 'MainController@deviceInsert');
-////    $app->get('/test','MainController@test');
-//});
+$app->group(['middleware' => 'auth:api'], function($app)
+{
+    $app->get('/fcm', 'MainController@fcm');
+});
 
 $app->POST('/auth/login', 'AuthController@loginPost');
-$app->get('/fcm', 'MainController@fcm');
+

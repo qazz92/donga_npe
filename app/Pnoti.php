@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Noti extends Model
+class Pnoti extends Model
 {
-    public $timestamps = false;
+    protected $table = 'pnotis';
 
     protected $fillable = [
-        'user_id','pnotis_id','contents',
+        'admin_id','title','body','data',
     ];
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRoomTable extends Migration
+class CreateUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class CreateRoomTable extends Migration
      */
     public function up()
     {
-        Schema::create('rooms', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('room_no')->unique();
-            $table->string('room_name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->integer('circle_id')->unsigned()->default(1);
+            $table->integer('admin_value')->unsigned()->default(100);
+            $table->integer('banned')->unsigned()->default(0);
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ class CreateRoomTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('users');
     }
 }

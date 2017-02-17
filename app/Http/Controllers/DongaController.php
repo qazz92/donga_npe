@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Circle;
 use App\Professor;
 use App\Services\GetDonga;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use App\Normal_User;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use Log;
+use App\Room;
 
 class DongaController extends Controller
 {
@@ -24,6 +26,14 @@ class DongaController extends Controller
     public function __construct()
     {
         //
+    }
+
+    public function setCircle(Request $request){
+        $name = $request->input('name');
+        $circle = new Circle();
+        $circle->name = $name;
+        $circle->save();
+        return $circle;
     }
 
     // 식단표

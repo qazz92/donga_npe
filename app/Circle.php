@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Noti extends Model
+class Circle extends Model
 {
-    public $timestamps = false;
+    protected $table='circles';
 
     protected $fillable = [
-        'user_id','pnotis_id','contents',
+        'name',
     ];
 }

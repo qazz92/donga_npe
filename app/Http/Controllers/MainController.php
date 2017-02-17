@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Device;
-use App\Normal_User;
-use App\Noti;
+use App\Pnoti;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Log;
 use App\Services\FCMHandler;
 use Illuminate\Support\Facades\DB;
@@ -127,31 +127,43 @@ class MainController extends Controller
     {
         //echo $user->created_at->format('Y-m-d h:i:s');
 
-
+        $title = $request->input('title');
+        $body = $request->input('body');
+        $contents = $request->input('contents');
+        $circle_id = Auth::user()["circle_id"];
+        $admin_id = Auth::user()["id"];
+        Log::info($admin_id.'|'.$circle_id);
         $to = DB::table('devices')
             ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
             ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-            ->where('normal_users.coll', '=', '경영대학')
+            ->where('normal_users.circle_id', '=', $circle_id)
             ->pluck('pid', 'uid')->toArray();
 //        $to = Device::pluck('push_service_id','id')->toArray();
         if (!empty($to)) {
             Log::info("start!");
-            $message = array_merge(
-                ['contents' => 'hi2']
-            );
-            $fcm->to(array_values($to))->notification('hi5', 'hi5')->data($message)->send();
+            $message = ['contents' => $contents];
+
+            $fcm->to(array_values($to))->notification($title, $body)->data($message)->send();
+
+            $pnotis = new Pnoti();
+            $pnotis->admin_id = $admin_id;
+            $pnotis->title = $title;
+            $pnotis->body = $body;
+            $pnotis->data = $contents;
+            $pnotis->save();
+
             $path = storage_path('app/');
             $text = $path . date("Y-m-d h:i:s") . '_' . str_random(16) . '.txt';
             $ids = array_keys($to);
             foreach ($ids as $id) {
                 $mytime = Carbon::now();
-                $contents = $id . '|testesttest123|' . $mytime->toDateTimeString() . ';';
-                file_put_contents($text, $contents, FILE_APPEND);
+                $file_contents = $id . '|'.$pnotis['id'].'|'.$mytime->toDateTimeString() . ';';
+                file_put_contents($text, $file_contents, FILE_APPEND);
             }
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
             INTO TABLE notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, contents, created_at) SET id = NULL;";
+            (user_id, pnotis_id ,created_at) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateNormalUsersTable extends Migration
+class CreateCirclesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,9 @@ class CreateNormalUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('normal_users', function (Blueprint $table) {
+        Schema::create('circles', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('stuId')->unique();
             $table->string('name');
-            $table->string('coll');
-            $table->string('major');
-            $table->integer('circle')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +27,6 @@ class CreateNormalUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('normal_users');
+        Schema::dropIfExists('circles');
     }
 }
