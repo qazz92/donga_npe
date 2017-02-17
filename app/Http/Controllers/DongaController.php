@@ -225,7 +225,7 @@ class DongaController extends Controller
             $client = $result["client"];
             $user_id = $result["user_id"];
             $crawlerTable = $client->request('GET', $targetPage);
-            $cached = Cache::get('getSpeGrade_' . $user_id);
+            $cached = Cache::get('getSpeGrade_'.$year.$smt.$user_id);
             if (!$cached == null) {
                 Log::info('SPE CACHE');
                 return response()->json($cached);
@@ -234,7 +234,7 @@ class DongaController extends Controller
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 10);
                     $expiresAt = Carbon::now()->addMinutes(60);
-                    Cache::put('getSpeGrade_' . $user_id, $result, $expiresAt);
+                    Cache::put('getSpeGrade_'.$year.$smt.$user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
                     return response()->json(array('result_code' => 500));
