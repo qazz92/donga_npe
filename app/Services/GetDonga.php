@@ -46,11 +46,7 @@ class GetDonga
         $getAvgGrade = $label->filter('span#lblGpa')->text();
         $arr = array();
         $label->filter('table')->eq(2)->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-            if (strcmp($node->text(), "")) {
                 $arr[] = trim($node->text());
-            } else {
-                $arr[] = '';
-            }
         });
         $chArr = array_chunk($arr, $chunk);
         $result = array('result_code' => 1, 'result_body' => array('allGrade' => $getAllGrade, 'avgGrade' => $getAvgGrade, 'detail' => $chArr));
