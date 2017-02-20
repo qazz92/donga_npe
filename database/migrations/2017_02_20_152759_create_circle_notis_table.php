@@ -17,7 +17,7 @@ class CreateCircleNotisTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('pcircle_notis_id')->unsigned();
-            $table->integer('check')->unsigned()->default(0);
+            $table->integer('check_att')->unsigned()->default(0);
             $table->dateTime('created_at');
             $table->foreign('user_id')
                 ->references('id')

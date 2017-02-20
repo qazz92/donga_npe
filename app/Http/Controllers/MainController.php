@@ -230,7 +230,7 @@ class MainController extends Controller
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
             INTO TABLE circle_notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pcircle_notis_id,check,created_at) SET id = NULL;";
+            (user_id, pcircle_notis_id , check_att , created_at) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([
