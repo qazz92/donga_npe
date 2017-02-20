@@ -36,11 +36,17 @@ $app->post('/deviceConfirm', 'MainController@deviceConfirm');
 $app->post('/deviceUpdate', 'MainController@deviceUpdate');
 $app->post('/reg', 'MainController@reg');
 $app->post('/normal_reg', 'MainController@normal_reg');
+$app->get('/getNormalNotis','MainController@getNormalNotis');
+$app->get('/getCircleNotis','MainController@getCircleNotis');
 
 $app->group(['middleware' => 'auth:api'], function($app)
 {
-    $app->post('/normal/fcm', 'MainController@normal_fcm');
-    $app->post('/circle/fcm', 'MainController@circle_fcm');
+    $app->post('/normal/fcm', 'AdminController@normal_fcm');
+    $app->post('/circle/fcm', 'AdminController@circle_fcm');
+    $app->get('/getPNormalNotis','AdminController@getPNormalNotis');
+    $app->get('/getPCircleNotis','AdminController@getPCircleNotis');
+    $app->get('/adminNormalNotis','AdminController@admin_getNormalNotis');
+    $app->get('/adminCircleNotis','AdminController@admin_getCircleNotis');
 });
 
 $app->POST('/auth/login', 'AuthController@loginPost');
