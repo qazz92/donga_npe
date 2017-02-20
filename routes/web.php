@@ -43,6 +43,7 @@ $app->group(['middleware' => 'auth:api'], function($app)
 {
     $app->post('/normal/fcm', 'AdminController@normal_fcm');
     $app->post('/circle/fcm', 'AdminController@circle_fcm');
+    $app->get('/getMembers','AdminController@getMembers');
     $app->get('/getPNormalNotis','AdminController@getPNormalNotis');
     $app->get('/getPCircleNotis','AdminController@getPCircleNotis');
     $app->get('/adminNormalNotis','AdminController@admin_getNormalNotis');
