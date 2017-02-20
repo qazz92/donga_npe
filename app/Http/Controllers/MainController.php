@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Device;
+use App\PCircle_Noti;
 use App\Pnoti;
 use App\User;
 use Illuminate\Http\Request;
@@ -59,7 +60,29 @@ class MainController extends Controller
         }
 
     }
+    public function deviceConfirm(Request $request){
+        $user_id = $request->input('stuId');
+        $deivce_id = $request->input('device_id');
 
+        try {
+            $confirm = DB::table('devices')
+                ->select('user_id')
+                ->where('users.id', '=', $user_id)
+                ->where('id','=',$deivce_id)
+                ->get();
+
+            if ($confirm->isEmpty()){
+                DB::table('devices')
+                    ->where('users.id', '=', $user_id)
+                    ->update(['device_id'=>$deivce_id]);
+                return response()->json(['result_code'=>2]);
+            } else {
+                return response()->json(['result_code'=>1]);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['result_code'=>500]);
+        }
+    }
     // fcm token update
     public function deviceUpdate(Request $request)
     {
@@ -123,8 +146,53 @@ class MainController extends Controller
 
     }
 
+    public function normal_fcm(Request $request, FCMHandler $fcm)
+    {
+        $title = $request->input('title');
+        $body = $request->input('body');
+        $contents = $request->input('contents');
+        $circle_id = Auth::user()["circle_id"];
+        $admin_id = Auth::user()["id"];
+        Log::info($admin_id.'|'.$circle_id);
+        $to = DB::table('devices')
+            ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
+            ->select('normal_users.id as uid', 'devices.push_service_id as pid')
+            ->where('normal_users.circle_id', '=', $circle_id)
+            ->pluck('pid', 'uid')->toArray();
+        var_dump($to);
+//        $to = Device::pluck('push_service_id','id')->toArray();
+        if (!empty($to)) {
+            $message = ['contents' => $contents,'category'=>'normal'];
+
+            $fcm->to(array_values($to))->notification($title, $body)->data($message)->send();
+
+            $pnotis = new Pnoti();
+            $pnotis->admin_id = $admin_id;
+            $pnotis->title = $title;
+            $pnotis->body = $body;
+            $pnotis->data = $contents;
+            $pnotis->save();
+
+            $path = storage_path('app/notis/');
+            $text = $path . date("Y-m-d h:i:s") . '_' . str_random(16) . '.txt';
+            $ids = array_keys($to);
+            foreach ($ids as $id) {
+                $mytime = Carbon::now();
+                $file_contents = $id . '|'.$pnotis['id'].'|'.$mytime->toDateTimeString() . ';';
+                file_put_contents($text, $file_contents, FILE_APPEND);
+            }
+            $query = "LOAD DATA LOCAL INFILE '" . $text . "'
+            INTO TABLE notis
+            FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
+            (user_id, pnotis_id ,created_at) SET id = NULL;";
+            DB::connection()->getpdo()->exec($query);
+        }
+        return response()->json([
+            'success' => 'HTTP 요청 처리 완료'
+        ]);
+    }
     //fcm push
-    public function fcm(Request $request, FCMHandler $fcm)
+    public function circle_fcm(Request $request, FCMHandler $fcm)
     {
         //echo $user->created_at->format('Y-m-d h:i:s');
 
@@ -139,32 +207,32 @@ class MainController extends Controller
             ->select('normal_users.id as uid', 'devices.push_service_id as pid')
             ->where('normal_users.circle_id', '=', $circle_id)
             ->pluck('pid', 'uid')->toArray();
+        var_dump($to);
 //        $to = Device::pluck('push_service_id','id')->toArray();
         if (!empty($to)) {
-            Log::info("start!");
-            $message = ['contents' => $contents];
+            $message = ['contents' => $contents,'category'=>'circle'];
 
             $fcm->to(array_values($to))->notification($title, $body)->data($message)->send();
 
-            $pnotis = new Pnoti();
-            $pnotis->admin_id = $admin_id;
-            $pnotis->title = $title;
-            $pnotis->body = $body;
-            $pnotis->data = $contents;
-            $pnotis->save();
+            $pcnotis = new PCircle_Noti();
+            $pcnotis->admin_id = $admin_id;
+            $pcnotis->title = $title;
+            $pcnotis->body = $body;
+            $pcnotis->data = $contents;
+            $pcnotis->save();
 
-            $path = storage_path('app/');
+            $path = storage_path('app/cnotis/');
             $text = $path . date("Y-m-d h:i:s") . '_' . str_random(16) . '.txt';
             $ids = array_keys($to);
             foreach ($ids as $id) {
                 $mytime = Carbon::now();
-                $file_contents = $id . '|'.$pnotis['id'].'|'.$mytime->toDateTimeString() . ';';
+                $file_contents = $id . '|'.$pcnotis['id'].'|0|'.$mytime->toDateTimeString() . ';';
                 file_put_contents($text, $file_contents, FILE_APPEND);
             }
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
-            INTO TABLE notis
+            INTO TABLE circle_notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pnotis_id ,created_at) SET id = NULL;";
+            (user_id, pcircle_notis_id,check,created_at) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([

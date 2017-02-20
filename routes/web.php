@@ -32,13 +32,15 @@ $app->group(['prefix' => 'admin'], function () use ($app) {
     $app->get('/', 'AdminController@getIndex');
 });
 $app->post('/deviceInsert', 'MainController@deviceInsert');
+$app->post('/deviceConfirm', 'MainController@deviceConfirm');
 $app->post('/deviceUpdate', 'MainController@deviceUpdate');
 $app->post('/reg', 'MainController@reg');
 $app->post('/normal_reg', 'MainController@normal_reg');
 
 $app->group(['middleware' => 'auth:api'], function($app)
 {
-    $app->post('/fcm', 'MainController@fcm');
+    $app->post('/normal/fcm', 'MainController@normal_fcm');
+    $app->post('/circle/fcm', 'MainController@circle_fcm');
 });
 
 $app->POST('/auth/login', 'AuthController@loginPost');
