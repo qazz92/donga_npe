@@ -159,7 +159,6 @@ class MainController extends Controller
             ->select('normal_users.id as uid', 'devices.push_service_id as pid')
             ->where('normal_users.circle_id', '=', $circle_id)
             ->pluck('pid', 'uid')->toArray();
-        var_dump($to);
 //        $to = Device::pluck('push_service_id','id')->toArray();
         if (!empty($to)) {
             $message = ['contents' => $contents,'category'=>'normal'];
@@ -207,7 +206,6 @@ class MainController extends Controller
             ->select('normal_users.id as uid', 'devices.push_service_id as pid')
             ->where('normal_users.circle_id', '=', $circle_id)
             ->pluck('pid', 'uid')->toArray();
-        var_dump($to);
 //        $to = Device::pluck('push_service_id','id')->toArray();
         if (!empty($to)) {
             $message = ['contents' => $contents,'category'=>'circle'];
