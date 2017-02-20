@@ -104,7 +104,7 @@ class DongaController extends Controller
                     return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
                 }
             } else {
-                return response()->json(array("result_code" => 1, "result_body" => $getID));
+                return response()->json(array("result_code" => 1, "result_body" => $getID[0]));
             }
         } else {
             return response()->json(["result_code" => $result["result_code"]]);
