@@ -61,7 +61,7 @@ class MainController extends Controller
 
     }
     public function deviceConfirm(Request $request){
-        $user_id = $request->input('stuId');
+        $user_id = $request->input('id');
         $deivce_id = $request->input('device_id');
 
         try {
