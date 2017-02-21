@@ -27,8 +27,12 @@ class AdminController extends Controller
 
     //
     public function getMembers(){
-        $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->get();
-        return response()->json($members);
+        try{
+            $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->orberby('stuId')->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$members));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
     }
     public function normal_fcm(Request $request, FCMHandler $fcm)
     {
@@ -124,24 +128,41 @@ class AdminController extends Controller
 
 
     public function getPNormalNotis(){
-        $admin_id = Auth::user()["id"];
-        $pnotis = Pnoti::where('admin_id','=',$admin_id)->get();
-        return response()->json($pnotis);
+        try{
+            $admin_id = Auth::user()["id"];
+            $pnotis = Pnoti::where('admin_id','=',$admin_id)->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$pnotis));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
     }
     public function getPCircleNotis(){
-        $admin_id = Auth::user()["id"];
-        $pcnotis = PCircle_Noti::where('admin_id','=',$admin_id)->get();
-        return response()->json($pcnotis);
+        try {
+            $admin_id = Auth::user()["id"];
+            $pcnotis = PCircle_Noti::where('admin_id','=',$admin_id)->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$pcnotis));
+        } catch (\Exception $e) {
+            return response()->json(array('result_code'=>500));
+        }
     }
     public function admin_getNormalNotis(Request $request){
-        $pnotis_id = $request->input('notis_id');
-        $notis = Noti::where('pnotis_id','=',$pnotis_id)->get();
-        return response()->json($notis);
+        try {
+            $pnotis_id = $request->input('notis_id');
+            $notis = Noti::where('pnotis_id','=',$pnotis_id)->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$notis));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
+
     }
     public function admin_getCircleNotis(Request $request){
-        $pcnotis_id = $request->input('pcnotis_id');
-        $pcnotis = Circle_Noti::where('pcircle_notis_id','=',$pcnotis_id)->get();
-        return response()->json($pcnotis);
+        try {
+            $pcnotis_id = $request->input('pcnotis_id');
+            $pcnotis = Circle_Noti::where('pcircle_notis_id','=',$pcnotis_id)->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$pcnotis));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
     }
 
 }

@@ -98,6 +98,7 @@ class_alias(\LaravelFCM\Facades\FCMGroup::class, 'FCMGroup');
 if (env('APP_DEBUG')) {
     $app->register(Barryvdh\Debugbar\LumenServiceProvider::class);
 }
+$app->register(Appzcoder\LumenRoutesList\RoutesCommandServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*
