@@ -15,7 +15,7 @@ class AddReadToCircleNotisTable extends Migration
     {
         Schema::table('circle_notis', function (Blueprint $table) {
             //
-            $table->integer('read')->unsigned();
+            $table->integer('read_check')->unsigned();
         });
     }
 

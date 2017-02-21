@@ -52,5 +52,4 @@ $app->group(['middleware' => 'auth:api'], function($app)
 });
 
 $app->POST('/auth/login', 'AuthController@loginPost');
-$app->post('/auth/login', 'AuthController@loginPost');
 

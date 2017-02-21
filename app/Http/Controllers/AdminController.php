@@ -72,7 +72,7 @@ class AdminController extends Controller
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
             INTO TABLE notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pnotis_id ,created_at,read) SET id = NULL;";
+            (user_id, pnotis_id ,created_at, read_check) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([
@@ -119,7 +119,7 @@ class AdminController extends Controller
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
             INTO TABLE circle_notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pcircle_notis_id , check_att , created_at, read) SET id = NULL;";
+            (user_id, pcircle_notis_id , check_att , created_at, read_check) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([

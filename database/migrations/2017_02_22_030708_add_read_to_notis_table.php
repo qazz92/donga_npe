@@ -14,7 +14,7 @@ class AddReadToNotisTable extends Migration
     public function up()
     {
         Schema::table('notis', function (Blueprint $table) {
-            $table->integer('read')->unsigned();
+            $table->integer('read_check')->unsigned();
         });
     }
 
