@@ -131,7 +131,7 @@ class AdminController extends Controller
     public function getPNormalNotis(){
         try{
             $admin_id = Auth::user()["id"];
-            $pnotis = Pnoti::where('admin_id','=',$admin_id)->get();
+            $pnotis = Pnoti::where('admin_id','=',$admin_id)->orderBy('created_at','desc')->get();
             return response()->json(array('result_code'=>1,'result_body'=>$pnotis));
         } catch (\Exception $e){
             return response()->json(array('result_code'=>500));
@@ -140,7 +140,7 @@ class AdminController extends Controller
     public function getPCircleNotis(){
         try {
             $admin_id = Auth::user()["id"];
-            $pcnotis = PCircle_Noti::where('admin_id','=',$admin_id)->get();
+            $pcnotis = PCircle_Noti::where('admin_id','=',$admin_id)->orderBy('created_at','desc')->get();
             return response()->json(array('result_code'=>1,'result_body'=>$pcnotis));
         } catch (\Exception $e) {
             return response()->json(array('result_code'=>500));
