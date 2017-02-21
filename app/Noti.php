@@ -9,6 +9,6 @@ class Noti extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'user_id','pnotis_id','contents','read',
+        'user_id','pnotis_id','contents','read_check',
     ];
 }

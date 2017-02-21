@@ -187,7 +187,7 @@ class MainController extends Controller
         $notis_id = $request->input('notis_id');
         try {
             $read = Noti::find($notis_id);
-            $read->read = 1;
+            $read->read_check = 1;
             $read->save();
             return response()->json(array('result_code'=>1));
         } catch (\Exception $e) {
@@ -198,8 +198,19 @@ class MainController extends Controller
         $circle_notis_id = $request->input('circle_notis_id');
         try {
             $read = Circle_Noti::find($circle_notis_id);
-            $read->read = 1;
+            $read->read_check = 1;
             $read->save();
+            return response()->json(array('result_code'=>1));
+        } catch (\Exception $e) {
+            return response()->json(array('result_code'=>500));
+        }
+    }
+    public function change_att(Request $request){
+        $circle_notis_id = $request->input('circle_notis_id');
+        try {
+            $check_att = Circle_Noti::find($circle_notis_id);
+            $check_att->read = 1;
+            $check_att->save();
             return response()->json(array('result_code'=>1));
         } catch (\Exception $e) {
             return response()->json(array('result_code'=>500));
