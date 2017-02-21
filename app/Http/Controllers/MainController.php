@@ -162,7 +162,7 @@ class MainController extends Controller
                 ->join('pnotis', 'pnotis.id', '=', 'notis.pnotis_id')
                 ->select('pnotis.title as title','pnotis.body as body','pnotis.data as contents','notis.created_at as getTime')
                 ->where('notis.user_id', '=', $user_id)
-                ->orderBy('created_at','desc')
+                ->orderBy('notis.created_at','desc')
                 ->get();
             return response()->json(array('result_code'=>1,'result_body'=>$notis));
         } catch (\Exception $e){
@@ -176,7 +176,7 @@ class MainController extends Controller
                 ->join('pcircle_notis', 'pcircle_notis.id', '=', 'circle_notis.pcircle_notis_id')
                 ->select('pcircle_notis.title as title','pcircle_notis.body as body','pcircle_notis.data as contents','circle_notis.created_at as getTime')
                 ->where('circle_notis.user_id', '=', $user_id)
-                ->orderBy('created_at','desc')
+                ->orderBy('circle_notis.created_at','desc')
                 ->get();
             return response()->json(array('result_code'=>1,'result_body'=>$notis));
         } catch (\Exception $e){
