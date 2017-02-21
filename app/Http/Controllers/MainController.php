@@ -216,4 +216,22 @@ class MainController extends Controller
             return response()->json(array('result_code'=>500));
         }
     }
+    public function change_push_permit(Request $request){
+        $user_id = $request->input('user_id');
+        try {
+            $user = Normal_User::find($user_id);
+            $permit_flag = $user->push_permit;
+            if ($permit_flag == 0){
+                $user->push_permit = 1;
+                $user->save();
+                return response()->json(array('result_code'=>1));
+            } else {
+                $user->push_permit = 0;
+                $user->save();
+                return response()->json(array('result_code'=>1));
+            }
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
+    }
 }

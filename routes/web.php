@@ -41,6 +41,7 @@ $app->get('/getCircleNotis','MainController@getCircleNotis');
 $app->post('/normal_read','MainController@normal_read');
 $app->post('/circle_read','MainController@circle_read');
 $app->post('/change_att','MainController@change_att');
+$app->get('/change_push_permit','MainController@change_push_permit');
 
 $app->group(['middleware' => 'auth:api'], function($app)
 {
