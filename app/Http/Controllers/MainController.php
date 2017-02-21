@@ -207,9 +207,10 @@ class MainController extends Controller
     }
     public function change_att(Request $request){
         $circle_notis_id = $request->input('circle_notis_id');
+        $att = $request->input('att');
         try {
             $check_att = Circle_Noti::find($circle_notis_id);
-            $check_att->read = 1;
+            $check_att->read = $att;
             $check_att->save();
             return response()->json(array('result_code'=>1));
         } catch (\Exception $e) {
