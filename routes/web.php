@@ -38,6 +38,8 @@ $app->post('/reg', 'MainController@reg');
 $app->post('/normal_reg', 'MainController@normal_reg');
 $app->get('/getNormalNotis','MainController@getNormalNotis');
 $app->get('/getCircleNotis','MainController@getCircleNotis');
+$app->post('/normal_read','MainController@normal_read');
+$app->post('/circle_read','MainController@circle_read');
 
 $app->group(['middleware' => 'auth:api'], function($app)
 {
@@ -46,7 +48,6 @@ $app->group(['middleware' => 'auth:api'], function($app)
     $app->get('/getMembers','AdminController@getMembers');
     $app->get('/getPNormalNotis','AdminController@getPNormalNotis');
     $app->get('/getPCircleNotis','AdminController@getPCircleNotis');
-    $app->get('/adminNormalNotis','AdminController@admin_getNormalNotis');
     $app->get('/adminCircleNotis','AdminController@admin_getCircleNotis');
 });
 

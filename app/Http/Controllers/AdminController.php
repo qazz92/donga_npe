@@ -31,8 +31,8 @@ class AdminController extends Controller
             $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->orderBy('stuId')->get();
             return response()->json(array('result_code'=>1,'result_body'=>$members));
         } catch (\Exception $e){
-//            return response()->json(array('result_code'=>500));
-            echo $e;
+            return response()->json(array('result_code'=>500));
+//            echo $e;
         }
     }
     public function normal_fcm(Request $request, FCMHandler $fcm)
@@ -66,13 +66,13 @@ class AdminController extends Controller
             $ids = array_keys($to);
             foreach ($ids as $id) {
                 $mytime = Carbon::now();
-                $file_contents = $id . '|'.$pnotis['id'].'|'.$mytime->toDateTimeString() . ';';
+                $file_contents = $id . '|'.$pnotis['id'].'|'.$mytime->toDateTimeString() .'|0'. ';';
                 file_put_contents($text, $file_contents, FILE_APPEND);
             }
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
             INTO TABLE notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pnotis_id ,created_at) SET id = NULL;";
+            (user_id, pnotis_id ,created_at,read) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([
@@ -113,13 +113,13 @@ class AdminController extends Controller
             $ids = array_keys($to);
             foreach ($ids as $id) {
                 $mytime = Carbon::now();
-                $file_contents = $id . '|'.$pcnotis['id'].'|0|'.$mytime->toDateTimeString() . ';';
+                $file_contents = $id . '|'.$pcnotis['id'].'|0|'.$mytime->toDateTimeString() .'|0'.';';
                 file_put_contents($text, $file_contents, FILE_APPEND);
             }
             $query = "LOAD DATA LOCAL INFILE '" . $text . "'
             INTO TABLE circle_notis
             FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pcircle_notis_id , check_att , created_at) SET id = NULL;";
+            (user_id, pcircle_notis_id , check_att , created_at, read) SET id = NULL;";
             DB::connection()->getpdo()->exec($query);
         }
         return response()->json([
@@ -146,24 +146,22 @@ class AdminController extends Controller
             return response()->json(array('result_code'=>500));
         }
     }
-    public function admin_getNormalNotis(Request $request){
-        try {
-            $pnotis_id = $request->input('notis_id');
-            $notis = Noti::where('pnotis_id','=',$pnotis_id)->get();
-            return response()->json(array('result_code'=>1,'result_body'=>$notis));
-        } catch (\Exception $e){
-            return response()->json(array('result_code'=>500));
-        }
-
-    }
     public function admin_getCircleNotis(Request $request){
         try {
             $pcnotis_id = $request->input('pcnotis_id');
-            $pcnotis = Circle_Noti::where('pcircle_notis_id','=',$pcnotis_id)->get();
+//            $pcnotis = Circle_Noti::where('pcircle_notis_id','=',$pcnotis_id)->get();
+
+            $pcnotis = DB::table('circle_notis')
+                ->join('normal_users', 'normal_users.id', '=', 'circle_notis.user_id')
+                ->select('normal_users.name as name','circle_notis.check_att as att')
+                ->where('circle_notis.pcircle_notis_id', '=', $pcnotis_id)
+                ->get();
+
             return response()->json(array('result_code'=>1,'result_body'=>$pcnotis));
         } catch (\Exception $e){
             return response()->json(array('result_code'=>500));
         }
     }
+
 
 }

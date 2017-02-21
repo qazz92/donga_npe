@@ -156,13 +156,51 @@ class MainController extends Controller
         return view('privacy');
     }
     public function getNormalNotis(Request $request){
-        $user_id = $request->input('id');
-        $notis = Noti::where('user_id','=',$user_id);
-        return response()->json($notis);
+        $user_id = $request->input('user_id');
+        try {
+            $notis = DB::table('notis')
+                ->join('pnotis', 'pnotis.id', '=', 'notis.pnotis_id')
+                ->select('pnotis.title as title','pnotis.body as body','pnotis.data as contents','notis.created_at as getTime')
+                ->where('notis.user_id', '=', $user_id)
+                ->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$notis));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
     }
     public function getCircleNotis(Request $request){
-        $user_id = $request->input('id');
-        $notis = Circle_Noti::where('user_id','=',$user_id);
-        return response()->json($notis);
+        $user_id = $request->input('user_id');
+        try {
+            $notis = DB::table('circle_notis')
+                ->join('pcircle_notis', 'pcircle_notis.id', '=', 'circle_notis.pcircle_notis_id')
+                ->select('pcircle_notis.title as title','pcircle_notis.body as body','pcircle_notis.data as contents','circle_notis.created_at as getTime')
+                ->where('circle_notis.user_id', '=', $user_id)
+                ->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$notis));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>500));
+        }
+    }
+    public function normal_read(Request $request){
+        $notis_id = $request->input('notis_id');
+        try {
+            $read = Noti::find($notis_id);
+            $read->read = 1;
+            $read->save();
+            return response()->json(array('result_code'=>1));
+        } catch (\Exception $e) {
+            return response()->json(array('result_code'=>500));
+        }
+    }
+    public function circle_read(Request $request){
+        $circle_notis_id = $request->input('circle_notis_id');
+        try {
+            $read = Circle_Noti::find($circle_notis_id);
+            $read->read = 1;
+            $read->save();
+            return response()->json(array('result_code'=>1));
+        } catch (\Exception $e) {
+            return response()->json(array('result_code'=>500));
+        }
     }
 }

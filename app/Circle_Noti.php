@@ -11,6 +11,6 @@ class Circle_Noti extends Model
     protected $table='circle_notis';
 
     protected $fillable = [
-        'user_id','pcircle_notis','check','created_at'
+        'user_id','pcircle_notis','check','created_at','read',
     ];
 }
