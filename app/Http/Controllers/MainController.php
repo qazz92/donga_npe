@@ -210,7 +210,7 @@ class MainController extends Controller
         $att = $request->input('att');
         try {
             $check_att = Circle_Noti::find($circle_notis_id);
-            $check_att->read = $att;
+            $check_att->read_check = $att;
             $check_att->save();
             return response()->json(array('result_code'=>1));
         } catch (\Exception $e) {
