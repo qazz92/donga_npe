@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Circle_Noti;
 use App\Device;
+use App\Normal_User;
 use App\Noti;
 use App\User;
 use Illuminate\Http\Request;
@@ -22,9 +23,16 @@ class MainController extends Controller
         //
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        echo "Hello";
+        $user = new Normal_User();
+        $user->stuId = $request->input('stuId');
+        $user->name = $request->input('name');
+        $user->coll = $request->input('coll');
+        $user->major = $request->input('major');
+        $user->save();
+
+        return response()->json($user);
     }
 
     //동아리 회장 회원가입
