@@ -28,10 +28,11 @@ class AdminController extends Controller
     //
     public function getMembers(){
         try{
-            $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->orberBy('stuId','desc')->get();
+            $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->orderBy('stuId')->get();
             return response()->json(array('result_code'=>1,'result_body'=>$members));
         } catch (\Exception $e){
-            return response()->json(array('result_code'=>500));
+//            return response()->json(array('result_code'=>500));
+            echo $e;
         }
     }
     public function normal_fcm(Request $request, FCMHandler $fcm)
