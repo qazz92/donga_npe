@@ -153,7 +153,7 @@ class AdminController extends Controller
 
             $pcnotis = DB::table('circle_notis')
                 ->join('normal_users', 'normal_users.id', '=', 'circle_notis.user_id')
-                ->select('normal_users.name as name','circle_notis.check_att as att')
+                ->select('normal_users.stuId as stuId','normal_users.name as name','circle_notis.check_att as att')
                 ->where('circle_notis.pcircle_notis_id', '=', $pcnotis_id)
                 ->get();
 
