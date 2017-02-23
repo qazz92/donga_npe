@@ -160,7 +160,7 @@ class MainController extends Controller
         try {
             $notis = DB::table('notis')
                 ->join('pnotis', 'pnotis.id', '=', 'notis.pnotis_id')
-                ->select('pnotis.title as title','pnotis.body as body','pnotis.data as contents','notis.created_at as getTime')
+                ->select('notis.id as id','pnotis.title as title','pnotis.body as body','pnotis.data as contents','notis.created_at as getTime')
                 ->where('notis.user_id', '=', $user_id)
                 ->orderBy('notis.created_at','desc')
                 ->get();
