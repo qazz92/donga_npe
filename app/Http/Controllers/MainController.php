@@ -174,7 +174,7 @@ class MainController extends Controller
         try {
             $notis = DB::table('circle_notis')
                 ->join('pcircle_notis', 'pcircle_notis.id', '=', 'circle_notis.pcircle_notis_id')
-                ->select('circle_notis.id','pcircle_notis.title as title','pcircle_notis.body as body','pcircle_notis.data as contents','circle_notis.created_at as getTime')
+                ->select('circle_notis.id as id','pcircle_notis.title as title','pcircle_notis.body as body','pcircle_notis.data as contents','pcircle_notis.read_check as read_check','circle_notis.created_at as getTime')
                 ->where('circle_notis.user_id', '=', $user_id)
                 ->orderBy('circle_notis.created_at','desc')
                 ->get();
