@@ -143,7 +143,7 @@ class MainController extends Controller
                 return response()->json(["result_code" => $identi_error]);
             }
         } else {
-            Log::info("이미 존재합니다. !!" . $getDevice[0]->push_service_id);
+            Log::info("OLD : " . $getDevice[0]->push_service_id.'| NEW : '.$push_service_id);
             $getDevice[0]->push_service_id = $push_service_id;
             $getDevice[0]->save();
             return response()->json(["result_code" => $identi_exist]);
