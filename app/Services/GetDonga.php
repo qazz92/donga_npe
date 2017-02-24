@@ -57,7 +57,7 @@ class GetDonga
     {
         $result = array();
         for ($j = 3; $j < 31; $j++) {
-            $result[$day][] = $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->eq(1)->text() . $j . '. 아마도 ' . $day;
+            $result[$day][] = $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->eq(1)->text();
         }
         return $result;
     }
