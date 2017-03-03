@@ -29,6 +29,7 @@ $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('getCircle','DongaController@getCircle');
     $app->post('setCircle','DongaController@setCircle');
     $app->post('setNoneCirclee','DongaController@setNoneCircle');
+    $app->get('checkCircle','DongaController@checkCircle');
 });
 $app->group(['prefix' => 'admin'], function () use ($app) {
     $app->get('/', 'AdminController@getIndex');

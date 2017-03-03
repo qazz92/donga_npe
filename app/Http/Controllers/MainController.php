@@ -25,14 +25,7 @@ class MainController extends Controller
 
     public function index(Request $request)
     {
-        $user = new Normal_User();
-        $user->stuId = $request->input('stuId');
-        $user->name = $request->input('name');
-        $user->coll = $request->input('coll');
-        $user->major = $request->input('major');
-        $user->save();
 
-        return response()->json($user);
     }
 
     //동아리 회장 회원가입
@@ -41,14 +34,17 @@ class MainController extends Controller
         $identi_ok = 1;
         $identi_error = 0;
         $identi_exist = 2;
+        $user_id = $request->input("user_id");
         $email = $request->input("email");
         $pw = $request->input("password");
+        $circle_id = $request->input('circle_id');
         if (User::where('email', '=', $email)->get()->isEmpty()) {
             try {
                 $user = new User();
                 $user->email = $email;
                 $user->password = app('hash')->make($pw);
-                $user->user_id = 3;
+                $user->user_id = $user_id;
+                $user->circle_id = $circle_id;
                 $result = $user->save();
                 if ($result) {
                     return response()->json(["result_code" => $identi_ok]);

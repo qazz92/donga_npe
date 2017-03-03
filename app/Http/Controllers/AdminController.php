@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\Circle_Noti;
 use App\Normal_User;
+use App\User;
+use App\User_Circle;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +29,6 @@ class AdminController extends Controller
     {
         //
     }
-
     //
     public function getMembers(){
         try{

@@ -17,7 +17,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->string('email')->unique();
             $table->string('password');
-            $table->integer('circle_id')->unsigned()->default(1);
+            $table->integer('circle_id')->unsigned()->default(8);
             $table->integer('admin_value')->unsigned()->default(100);
             $table->integer('banned')->unsigned()->default(0);
             $table->timestamps();

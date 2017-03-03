@@ -108,6 +108,22 @@ class DongaController extends Controller
             return response()->json(["result_code" => $result["result_code"]]);
         }
     }
+    public function checkCircle(Request $request){
+        $user_id = $request->input('user_id');
+        try {
+            $check = User_Circle::where('user_id','=',$user_id);
+
+
+            if ($check->isEmpty()){
+                return response()->json(array('result_code'=>0));
+            } else {
+                return response()->json(array('result_code'=>1));
+            }
+        } catch (QueryException $e) {
+            return response()->json(array('result_code'=>500));
+        }
+
+    }
     public function getCircle(Request $request){
         $major = $request->input('major');
        try {
