@@ -136,6 +136,7 @@ class DongaController extends Controller
         } catch (QueryException $e) {
             return response()->json(array('result_code'=>500));
         } catch (\Exception $e){
+            Log::info($e);
             return response()->json(array('result_code'=>0));
         }
 
