@@ -32,7 +32,14 @@ class AdminController extends Controller
     //
     public function getMembers(){
         try{
-            $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->orderBy('stuId')->get();
+            $circle_id = Auth::user()["circle_id"];
+//            $members = Normal_User::where('circle_id',Auth::user()["circle_id"])->orderBy('stuId')->get();
+            $members = DB::table('normal_users')
+                ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
+                ->select('normal_users.id as id','normal_users.stuId as stuId','normal_users.name as name','normal_users.major as major','normal_users.push_permit as push_permit','normal_users.created_at as created_at,normal_users.updated_at')
+                ->where('user_circles.circle_id', '=', $circle_id)
+                ->orderBy('normal_users.created_at','desc')
+                ->get();
             return response()->json(array('result_code'=>1,'result_body'=>$members));
         } catch (\Exception $e){
             return response()->json(array('result_code'=>500));
