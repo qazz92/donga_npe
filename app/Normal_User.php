@@ -9,7 +9,7 @@ class Normal_User extends Model
     protected $table = 'normal_users';
 
     protected $fillable = [
-        'stuId','circle',
+        'stuId','name','coll','major',
     ];
 
     public function devices()
