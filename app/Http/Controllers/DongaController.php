@@ -138,6 +138,21 @@ class DongaController extends Controller
         } catch (\Exception $e){
             return response()->json(array('result_code'=>0));
         }
+
+    }
+    public function setNoneCircle(Request $request){
+        $user_id = $request->input('user_id');
+        try {
+            $setCircle = new User_Circle();
+            $setCircle->user_id = $user_id;
+            $setCircle->circle_id = 8;
+            $setCircle->save();
+            return response()->json(array('result_code'=>1));
+        } catch (QueryException $e) {
+            return response()->json(array('result_code'=>500));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>0));
+        }
     }
     public function getGraduated(Request $request, GetDonga $getDonga)
     {

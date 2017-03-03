@@ -56,6 +56,7 @@ class AdminController extends Controller
                 ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
                 ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
                 ->select('normal_users.id as uid', 'devices.push_service_id as pid')
+                ->where('normal_users.push_permit', '=', 0)
                 ->where('user_circles.circle_id', '=', $circle_id)
                 ->pluck('pid', 'uid')->toArray();
         } catch (QueryException $e){
@@ -124,6 +125,7 @@ class AdminController extends Controller
                 ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
                 ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
                 ->select('normal_users.id as uid', 'devices.push_service_id as pid')
+                ->where('normal_users.push_permit', '=', 0)
                 ->where('user_circles.circle_id', '=', $circle_id)
                 ->pluck('pid', 'uid')->toArray();
         } catch (QueryException $e){
