@@ -112,7 +112,7 @@ class DongaController extends Controller
         $major = $request->input('major');
        try {
            $circles = Circle::where('major','=',$major)->get();
-           if ($circles>isEmpty()){
+           if ($circles->isEmpty()){
                return response()->json(array('result_code'=>500));
            }
            return response()->json(array('result_code'=>1,'result_body'=>$circles));
