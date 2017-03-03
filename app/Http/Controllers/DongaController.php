@@ -111,7 +111,7 @@ class DongaController extends Controller
     public function checkCircle(Request $request){
         $user_id = $request->input('user_id');
         try {
-            $check = User_Circle::where('user_id','=',$user_id);
+            $check = User_Circle::where('user_id','=',$user_id)->get();
 
 
             if ($check->isEmpty()){
