@@ -34,7 +34,6 @@ class MainController extends Controller
         $identi_ok = 1;
         $identi_error = 0;
         $identi_exist = 2;
-        $user_id = $request->input("user_id");
         $email = $request->input("email");
         $pw = $request->input("password");
         $circle_id = $request->input('circle_id');
@@ -43,19 +42,18 @@ class MainController extends Controller
                 $user = new User();
                 $user->email = $email;
                 $user->password = app('hash')->make($pw);
-                $user->user_id = $user_id;
                 $user->circle_id = $circle_id;
                 $result = $user->save();
                 if ($result) {
                     return response()->json(["result_code" => $identi_ok]);
                 } else {
-                    echo $result;
-//                    return response()->json(["result_code" => $identi_error]);
+//                    echo $result;
+                    return response()->json(["result_code" => $identi_error]);
                 }
             } catch (\Exception $e) {
 //                Log::info("USER INSERT ERROR !! : " . $e);
-                echo $e;
-//                return response()->json(["result_code" => $identi_error]);
+//                echo $e;
+                return response()->json(["result_code" => $identi_error]);
             }
         } else {
             Log::info("이미 존재합니다. !!");
