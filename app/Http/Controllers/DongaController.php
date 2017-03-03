@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Circle;
 use App\Professor;
 use App\Services\GetDonga;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use Log;
 use App\Room;
+use App\User_Circle;
 
 class DongaController extends Controller
 {
@@ -26,14 +28,6 @@ class DongaController extends Controller
     public function __construct()
     {
         //
-    }
-
-    public function setCircle(Request $request){
-        $name = $request->input('name');
-        $circle = new Circle();
-        $circle->name = $name;
-        $circle->save();
-        return $circle;
     }
 
     // 식단표
@@ -114,7 +108,34 @@ class DongaController extends Controller
             return response()->json(["result_code" => $result["result_code"]]);
         }
     }
-
+    public function getCircle(Request $request){
+        $major = $request->input('major');
+       try {
+           $circles = Circle::where('major','=',$major)->get();
+           return response()->json(array('result_code'=>1,'result_body'=>$circles));
+       } catch (QueryException $e){
+           return response()->json(array('result_code'=>500));
+       } catch (\Exception $e){
+           return response()->json(array('result_code'=>0));
+       }
+    }
+    public function setCircle(Request $request){
+        $user_id = $request->input('user_id');
+        $circles = $request->input('circles');
+        try {
+            foreach ($circles as $circle){
+                $setCircle = new User_Circle();
+                $setCircle->user_id = $user_id;
+                $setCircle->circle_id = $circle["circle_id"];
+                $setCircle->save();
+            }
+            return response()->json(array('result_code'=>1));
+        } catch (QueryException $e) {
+            return response()->json(array('result_code'=>500));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>0));
+        }
+    }
     public function getGraduated(Request $request, GetDonga $getDonga)
     {
         $dis = 'student';

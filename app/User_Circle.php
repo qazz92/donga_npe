@@ -4,11 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Circle extends Model
+class User_Circle extends Model
 {
-    protected $table='circles';
+    protected $table='user_circles';
 
     protected $fillable = [
-        'name','major',
+        'user_id','circle_id',
     ];
 }

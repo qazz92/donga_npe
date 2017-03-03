@@ -19,14 +19,14 @@ class CreateNormalUsersTable extends Migration
             $table->string('name');
             $table->string('coll');
             $table->string('major');
-            $table->integer('circle_id')->unsigned()->default(1);
+//            $table->integer('circle_id')->unsigned()->default(1);
             $table->integer('push_permit')->default(0);
             $table->timestamps();
 
-            $table->foreign('circle_id')
-                ->references('id')
-                ->on('circles')
-                ->onDelete('cascade');
+//            $table->foreign('circle_id')
+//                ->references('id')
+//                ->on('circles')
+//                ->onDelete('cascade');
         });
     }
 
