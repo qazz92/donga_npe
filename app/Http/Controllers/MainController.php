@@ -49,11 +49,13 @@ class MainController extends Controller
                 if ($result) {
                     return response()->json(["result_code" => $identi_ok]);
                 } else {
-                    return response()->json(["result_code" => $identi_error]);
+                    echo $result;
+//                    return response()->json(["result_code" => $identi_error]);
                 }
             } catch (\Exception $e) {
-                Log::info("USER INSERT ERROR !! : " . $e);
-                return response()->json(["result_code" => $identi_error]);
+//                Log::info("USER INSERT ERROR !! : " . $e);
+                echo $e;
+//                return response()->json(["result_code" => $identi_error]);
             }
         } else {
             Log::info("이미 존재합니다. !!");
