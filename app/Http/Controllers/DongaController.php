@@ -326,7 +326,9 @@ class DongaController extends Controller
         $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
         $cookies = $client->getCookieJar()->all();
         $client->getCookieJar()->set($cookies[0]);
-        $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx');
+        try {
+            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx');
+            Log::info($crawlerTable->getUri());
             $cached = Cache::get('getTimeTable_' . $user_id);
             if ($cached == null) {
                 Log::info('TT CRA');
@@ -343,6 +345,9 @@ class DongaController extends Controller
                 Log::info('TT CACHE');
                 return response()->json(array('result_code' => 1, 'result_body' => $cached));
             }
+        } catch (\Exception $e){
+            echo $e;
+        }
     }
 
     //클래스 획득
