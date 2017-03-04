@@ -313,22 +313,28 @@ class DongaController extends Controller
 
     public function getTimeTable(Request $request, GetDonga $getDonga)
     {
-        $dis = 'sugang';
-        $loginPage = 'https://sugang.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
-        if ($result["result_code"] == 1) {
-            $targetPage = 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx';
-            $client = $result["client"];
-            $user_id = $result["user_id"];
+        $user_id = $request->input('stuId');
+        $user_pw = $request->input('stuPw');
+        $client = new \Goutte\Client();
+        $guzzleClient = new \GuzzleHttp\Client(array(
+            'timeout' => 90,
+            'verify' => false,
+        ));
+        $client->setClient($guzzleClient);
+        $crawlerLogin = $client->request('GET', 'https://sugang.donga.ac.kr/login.aspx');
+        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
+        $cookies = $client->getCookieJar()->all();
+        $client->getCookieJar()->set($cookies[0]);
+        $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx');
             $cached = Cache::get('getTimeTable_' . $user_id);
             if ($cached == null) {
                 Log::info('TT CRA');
-                $crawlerTable = $client->request('GET', $targetPage);
-                $mon = $getDonga->getTimetableLoop("mon", $crawlerTable);
-                $tue = $getDonga->getTimetableLoop("tue", $crawlerTable);
-                $wen = $getDonga->getTimetableLoop("wen", $crawlerTable);
-                $thu = $getDonga->getTimetableLoop("thu", $crawlerTable);
-                $fri = $getDonga->getTimetableLoop("fri", $crawlerTable);
+                $mon = $getDonga->getTimetableLoop(1, $crawlerTable);
+                $tue = $getDonga->getTimetableLoop(2, $crawlerTable);
+                $wen = $getDonga->getTimetableLoop(3, $crawlerTable);
+                $thu = $getDonga->getTimetableLoop(4, $crawlerTable);
+                $fri = $getDonga->getTimetableLoop(5, $crawlerTable);
                 $arr = array($mon, $tue, $wen, $thu, $fri);
                 $expiresAt = Carbon::now()->addMinutes(60);
                 Cache::put('getTimeTable_' . $user_id, $arr, $expiresAt);
@@ -337,9 +343,6 @@ class DongaController extends Controller
                 Log::info('TT CACHE');
                 return response()->json(array('result_code' => 1, 'result_body' => $cached));
             }
-        } else {
-            return response()->json(["result_code" => $result["result_code"]]);
-        }
     }
 
     //클래스 획득

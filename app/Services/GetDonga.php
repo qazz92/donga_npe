@@ -37,6 +37,7 @@ class GetDonga
             return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
         } catch (\Exception $e) {
             return array('result_code' => 500);
+//            echo $e;
         }
     }
     public function getGrade($crawlerTable, $chunk)
@@ -55,9 +56,29 @@ class GetDonga
 
     public function getTimetableLoop($day, $crawlerTable)
     {
+        $dayString = '';
+        switch ($day){
+            case 1:
+                $dayString="mon";
+                break;
+            case 2:
+                $dayString="tue";
+                break;
+            case 3:
+                $dayString="wen";
+                break;
+            case 4:
+                $dayString="thu";
+                break;
+            case 5:
+                $dayString="fri";
+                break;
+        }
         $result = array();
         for ($j = 3; $j < 31; $j++) {
-            $result[$day][] = $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->eq(1)->text();
+            $dirtyResult = $crawlerTable->filter('table#htblTime')->filter('tr')->eq($j)->filter('td')->eq($day)->html();
+            $cleanResult = str_replace('<br>','|',str_replace("\xc2\xa0",' ',$dirtyResult));
+            $result[$dayString][] = preg_replace('/\s+/','$1|',$cleanResult);
         }
         return $result;
     }
