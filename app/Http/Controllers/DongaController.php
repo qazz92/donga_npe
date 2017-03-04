@@ -346,7 +346,7 @@ class DongaController extends Controller
                 return response()->json(array('result_code' => 1, 'result_body' => $cached));
             }
         } catch (\Exception $e){
-            echo $e;
+            return response()->json(array('result_code' => 500));
         }
     }
 
