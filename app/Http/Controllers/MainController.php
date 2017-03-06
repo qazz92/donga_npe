@@ -231,4 +231,10 @@ class MainController extends Controller
             return response()->json(array('result_code'=>500));
         }
     }
+    public function removeNormalNotis(Request $request){
+        $targets = $request->input('targets');
+        foreach ($targets as $target){
+            echo $target["id"];
+        }
+    }
 }
