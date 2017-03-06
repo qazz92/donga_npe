@@ -221,11 +221,11 @@ class MainController extends Controller
             if ($permit_flag == 0){
                 $user->push_permit = 1;
                 $user->save();
-                return response()->json(array('result_code'=>1));
+                return response()->json(array('result_code'=>1,'result_body'=>1));
             } else {
                 $user->push_permit = 0;
                 $user->save();
-                return response()->json(array('result_code'=>1));
+                return response()->json(array('result_code'=>1,'result_body'=>0));
             }
         } catch (\Exception $e){
             return response()->json(array('result_code'=>500));
