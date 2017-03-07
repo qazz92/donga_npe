@@ -233,8 +233,13 @@ class MainController extends Controller
     }
     public function removeNormalNotis(Request $request){
         $targets = $request->input('targets');
-        foreach ($targets as $target){
-            echo $target["id"];
+        try {
+            foreach ($targets as $target){
+//            echo $target["id"];
+            }
+            return response(array('result_code'=>1));
+        } catch (\Exception $e){
+            return response(array('result_code'=>0));
         }
     }
 }
