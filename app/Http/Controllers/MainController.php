@@ -7,6 +7,7 @@ use App\Device;
 use App\Normal_User;
 use App\Noti;
 use App\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Log;
 use Illuminate\Support\Facades\DB;
@@ -234,10 +235,21 @@ class MainController extends Controller
     public function removeNormalNotis(Request $request){
         $targets = $request->input('targets');
         try {
-            foreach ($targets as $target){
-//            echo $target["id"];
-            }
+            Noti::destroy($targets);
             return response(array('result_code'=>1));
+        } catch (QueryException $e){
+            return response(array('result_code'=>500));
+        } catch (\Exception $e){
+            return response(array('result_code'=>0));
+        }
+    }
+    public function removeCircleNotis(Request $request){
+        $targets = $request->input('targets');
+        try {
+            Circle_Noti::destroy($targets);
+            return response(array('result_code'=>1));
+        } catch (QueryException $e){
+            return response(array('result_code'=>500));
         } catch (\Exception $e){
             return response(array('result_code'=>0));
         }
