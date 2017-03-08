@@ -108,6 +108,17 @@ class DongaController extends Controller
             return response()->json(["result_code" => $result["result_code"]]);
         }
     }
+    public function removeCircle(Request $request){
+        $ids = $request->input('targets');
+        try {
+            User_Circle::destroy($ids);
+            return response()->json(array('result_code'=>1));
+        } catch (QueryException $e){
+            return response()->json(array("result_code" => 500));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>0));
+        }
+    }
     public function checkCircle(Request $request){
         $user_id = $request->input('user_id');
         try {
@@ -117,7 +128,7 @@ class DongaController extends Controller
             if ($check->isEmpty()){
                 return response()->json(array('result_code'=>0));
             } else {
-                return response()->json(array('result_code'=>1));
+                return response()->json(array('result_code'=>1,'result_body'=>$check));
             }
         } catch (QueryException $e) {
             return response()->json(array('result_code'=>500));
