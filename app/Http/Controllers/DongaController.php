@@ -340,7 +340,7 @@ class DongaController extends Controller
         $client->getCookieJar()->set($cookies[0]);
         try {
             $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx');
-            Log::info($crawlerTable->getUri());
+            Log::info($crawlerTable->html());
             $cached = Cache::get('getTimeTable_' . $user_id);
             if ($cached == null) {
                 Log::info('TT CRA');
@@ -358,8 +358,7 @@ class DongaController extends Controller
                 return response()->json(array('result_code' => 1, 'result_body' => $cached));
             }
         } catch (\Exception $e){
-            echo $e;
-//            return response()->json(array('result_code' => 500));
+            return response()->json(array('result_code' => 500));
         }
     }
 
