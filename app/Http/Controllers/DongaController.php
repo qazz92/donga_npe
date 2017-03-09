@@ -113,6 +113,10 @@ class DongaController extends Controller
         $ids = $request->input('targets');
         try {
             $result = User_Circle::destroy($ids);
+            if ($result>0){
+                $olds = $request->input('olds');
+
+            }
             return response()->json(array('result_code'=>1,'result_body'=>$result));
         } catch (QueryException $e){
             return response()->json(array("result_code" => 500));
