@@ -177,10 +177,9 @@ class AdminController extends Controller
                     'result_code' => 1
                 ]);
             } catch (\Exception $e){
-                echo $e;
-//                return response()->json([
-//                    'result_code' => 500
-//                ]);
+                return response()->json([
+                    'result_code' => 500
+                ]);
             }
         }
     }
