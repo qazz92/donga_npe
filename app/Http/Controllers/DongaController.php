@@ -156,19 +156,15 @@ class DongaController extends Controller
     }
     public function setCircle(Request $request){
         $user_id = $request->input('user_id');
-//        $circles = $request->input('circles');
-        $circle_id = $request->input('circle_id');
+        $circles = $request->input('circles');
+//        $circle_id = $request->input('circle_id');
         try {
-//            foreach ($circles as $circle){
-//                $setCircle = new User_Circle();
-//                $setCircle->user_id = $user_id;
-//                $setCircle->circle_id = $circle["circle_id"];
-//                $setCircle->save();
-//            }
+            foreach ($circles as $circle){
                 $setCircle = new User_Circle();
                 $setCircle->user_id = $user_id;
-                $setCircle->circle_id = $circle_id;
+                $setCircle->circle_id = $circle;
                 $setCircle->save();
+            }
             return response()->json(array('result_code'=>1));
         } catch (QueryException $e) {
             return response()->json(array('result_code'=>500));
