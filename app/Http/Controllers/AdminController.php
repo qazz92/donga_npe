@@ -120,9 +120,10 @@ class AdminController extends Controller
     {
         //echo $user->created_at->format('Y-m-d h:i:s');
 
-        $title = $request->input('title');
-        $body = $request->input('body');
-        $contents = $request->input('contents');
+        $article = $request->input('article');
+        $title = $article["title"];
+        $body = $article["body"];
+        $contents = $article["contents"];
         try {
             $circle_id = Auth::user()["circle_id"];
             $admin_id = Auth::user()["id"];
@@ -145,10 +146,10 @@ class AdminController extends Controller
             ]);
         }
         if (!empty($to)) {
-            $message = ['contents' => $contents,'category'=>'circle'];
+            $message = ['contents' => $article,'category'=>'circle'];
 
             try {
-                $fcm->to(array_values($to))->notification($title, $body)->data($message)->send();
+                $fcm->to(array_values($to))->data($message)->send();
             } catch (\Exception $e){
                 return response()->json([
                     'result_code' => 500
