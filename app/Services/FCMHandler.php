@@ -166,7 +166,7 @@ class FCMHandler
         return $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
-            $this->buildNotification($this->title,$this->body),
+//            $this->buildNotification($this->title,$this->body),
             $this->buildPayload()
         );
     }
