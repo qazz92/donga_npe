@@ -169,7 +169,6 @@ class FCMHandler
             null,
             $this->buildPayload()
         );
-        Log::info($post);
         return $post;
     }
 
