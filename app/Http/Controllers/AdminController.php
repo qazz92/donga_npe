@@ -219,6 +219,16 @@ class AdminController extends Controller
             return response()->json(array('result_code'=>500));
         }
     }
+    public function removePmk(){
+        try {
+            $result = User_Circle::destroy(5);
+            return response()->json(array('result_code'=>1,'result_body'=>$result));
+        } catch (QueryException $e) {
+            return response()->json(array('result_code'=>500));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>0));
+        }
 
+    }
 
 }

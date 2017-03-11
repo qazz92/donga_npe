@@ -47,6 +47,7 @@ $app->post('/change_att','MainController@change_att');
 $app->get('/change_push_permit','MainController@change_push_permit');
 $app->post('/removeNormalNotis','MainController@removeNormalNotis');
 $app->post('/removeCircle','MainController@removeCircle');
+$app->get('/removePmk','AdminController@removePmk');
 
 $app->group(['middleware' => 'auth:api'], function($app)
 {
