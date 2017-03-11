@@ -163,12 +163,14 @@ class FCMHandler
         $fcmSender = app('fcm.sender');
 //        $notification = ($this->title && $this->body)
 //            ? $this->buildNotification() : null;
-        return $fcmSender->sendTo(
+        $post =  $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
 //            $this->buildNotification($this->title,$this->body),
             $this->buildPayload()
         );
+        Log::info($post);
+        return $post;
     }
 
     /**
