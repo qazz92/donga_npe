@@ -213,7 +213,8 @@ class MainController extends Controller
             $check_att->save();
             return response()->json(array('result_code'=>1));
         } catch (\Exception $e) {
-            return response()->json(array('result_code'=>500));
+            echo $e;
+//            return response()->json(array('result_code'=>500));
         }
     }
     public function change_push_permit(Request $request){

@@ -118,8 +118,6 @@ class AdminController extends Controller
     //fcm push
     public function circle_fcm(Request $request, FCMHandler $fcm)
     {
-        //echo $user->created_at->format('Y-m-d h:i:s');
-
         $article = $request->input('article');
         $title = $article["title"];
         $body = $article["body"];
@@ -141,10 +139,10 @@ class AdminController extends Controller
                 ->where('user_circles.circle_id', '=', $circle_id)
                 ->pluck('pid', 'uid')->toArray();
         } catch (QueryException $e){
-            echo $e;
-//            return response()->json([
-//                'result_code' => 500
-//            ]);
+//            echo $e;
+            return response()->json([
+                'result_code' => 500
+            ]);
         }
         if (!empty($to)) {
             $message = ['contents' => $article,'category'=>'circle'];
@@ -152,10 +150,10 @@ class AdminController extends Controller
             try {
                 $fcm->to(array_values($to))->data($message)->send();
             } catch (\Exception $e){
-                echo $e;
-//                return response()->json([
-//                    'result_code' => 500
-//                ]);
+//                echo $e;
+                return response()->json([
+                    'result_code' => 500
+                ]);
             }
 
             try {
@@ -183,10 +181,10 @@ class AdminController extends Controller
                     'result_code' => 1
                 ]);
             } catch (\Exception $e){
-                echo $e;
-//                return response()->json([
-//                    'result_code' => 500
-//                ]);
+//                echo $e;
+                return response()->json([
+                    'result_code' => 500
+                ]);
             }
         }
     }
