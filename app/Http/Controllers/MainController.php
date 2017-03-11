@@ -11,6 +11,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Log;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class MainController extends Controller
 {
@@ -24,9 +25,10 @@ class MainController extends Controller
         //
     }
 
-    public function index(Request $request)
+    public function index()
     {
-
+        $now = Carbon::now();
+        echo $now;
     }
 
     //동아리 회장 회원가입

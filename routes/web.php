@@ -13,7 +13,7 @@ use App\Services\FCMHandler;
 |
 */
 
-$app->post('/', 'MainController@index');
+$app->get('/', 'MainController@index');
 $app->get('/privacy', 'MainController@privacy');
 $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('meal', 'DongaController@meal');
