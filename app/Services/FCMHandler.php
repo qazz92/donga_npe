@@ -166,7 +166,7 @@ class FCMHandler
         $post =  $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
-            $this->buildNotification($this->title,$this->body),
+            null,
             $this->buildPayload()
         );
         Log::info($post);
