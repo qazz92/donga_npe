@@ -180,7 +180,7 @@ class DongaController extends Controller
             $result =
                 DB::table('user_circles')
                 ->join('circles','circles.id','user_circles.circle_id')
-                ->select('circles.name as name')
+                ->select('circles.id as id','circles.name as name')
                 ->where('user_circles.user_id','=',$user_id)
                 ->get();
             return response()->json(array('result_code'=>1,'result_body'=>$result));
