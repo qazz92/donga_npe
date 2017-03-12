@@ -177,13 +177,16 @@ class DongaController extends Controller
     public function getUserCircle(Request $request){
         $user_id = $request->input('user_id');
         try {
-            $result = DB::table('user_circles')->join('circles','circles.id','user_circles.circle_id')
-            ->select('circles.name as name')
-            ->where('user_circles','=',$user_id)
-            ->get();
+            $result =
+                DB::table('user_circles')
+                ->join('circles','circles.id','user_circles.circle_id')
+                ->select('circles.name as name')
+                ->where('user_circles.user_id','=',$user_id)
+                ->get();
             return response()->json(array('result_code'=>1,'result_body'=>$result));
         } catch (QueryException $e){
-            return response()->json(array('result_code'=>500));
+            echo $e;
+//            return response()->json(array('result_code'=>500));
         } catch (\Exception $e){
             return response()->json(array('result_code'=>0));
         }
