@@ -193,11 +193,11 @@ class DongaController extends Controller
     }
     public function updateCircle(Request $request){
         $user_id = $request->input('user_id');
-        $olds  = $request->input('olds');
+//        $olds  = $request->input('olds');
         $news = $request->input('news');
 
         try {
-            $result = User_Circle::destroy($olds);
+            $result = User_Circle::where('user_id',$user_id)->delete();
             if ($result>0){
                 foreach ($news as $new){
                     $setCircle = new User_Circle();
