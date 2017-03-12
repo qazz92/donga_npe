@@ -174,6 +174,42 @@ class DongaController extends Controller
         }
 
     }
+    public function getUserCircle(Request $request){
+        $user_id = $request->input('user_id');
+        try {
+            $result = DB::table('user_circles')->join('circles','circles.id','user_circles.circle_id')
+            ->select('circles.name as name')
+            ->where('user_circles','=',$user_id)
+            ->get();
+            return response()->json(array('result_code'=>1,'result_body'=>$result));
+        } catch (QueryException $e){
+            return response()->json(array('result_code'=>500));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>0));
+        }
+    }
+    public function updateCircle(Request $request){
+        $user_id = $request->input('user_id');
+        $olds  = $request->input('olds');
+        $news = $request->input('news');
+
+        try {
+            $result = User_Circle::destroy($olds);
+            if ($result>0){
+                foreach ($news as $new){
+                    $setCircle = new User_Circle();
+                    $setCircle->user_id = $user_id;
+                    $setCircle->circle_id = $new;
+                    $setCircle->save();
+                }
+            }
+            return response()->json(array('result_code'=>1));
+        } catch (QueryException $e){
+            return response()->json(array('result_code'=>500));
+        } catch (\Exception $e){
+            return response()->json(array('result_code'=>0));
+        }
+    }
     public function setNoneCircle(Request $request){
         $user_id = $request->input('user_id');
         try {

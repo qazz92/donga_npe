@@ -28,6 +28,8 @@ $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('getPro', 'DongaController@getPro');
     $app->get('getCircle','DongaController@getCircle');
     $app->post('setCircle','DongaController@setCircle');
+    $app->post('getUserCircle','DongaController@getUserCircle');
+    $app->post('updateCircle','DongaController@updateCircle');
     $app->post('setNoneCirclee','DongaController@setNoneCircle');
     $app->get('checkCircle','DongaController@checkCircle');
 });
