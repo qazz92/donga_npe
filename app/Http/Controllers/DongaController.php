@@ -362,7 +362,7 @@ class DongaController extends Controller
 
     }
 
-    public function getTimeTable(Request $request, GetDonga $getDonga)
+    public function getTimeTable(Request $request)
     {
         $user_id = $request->input('stuId');
         $user_pw = $request->input('stuPw');
@@ -378,25 +378,23 @@ class DongaController extends Controller
         $cookies = $client->getCookieJar()->all();
         $client->getCookieJar()->set($cookies[0]);
         try {
-            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGINDTIMEPRT.aspx');
-            Log::info($crawlerTable->html());
+            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGPRT.aspx');
             $cached = Cache::get('getTimeTable_' . $user_id);
             if ($cached == null) {
-                Log::info('TT CRA');
-                $mon = $getDonga->getTimetableLoop(1, $crawlerTable);
-                $tue = $getDonga->getTimetableLoop(2, $crawlerTable);
-                $wen = $getDonga->getTimetableLoop(3, $crawlerTable);
-                $thu = $getDonga->getTimetableLoop(4, $crawlerTable);
-                $fri = $getDonga->getTimetableLoop(5, $crawlerTable);
-                $arr = array($mon, $tue, $wen, $thu, $fri);
+                $arr = array();
+                $crawlerTable->filter('table#reglisthead')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
+                    if ($i>10){
+                        $arr[] = trim($node->text());
+                    }
+                });
+                $chArr = array_chunk($arr, 10);
                 $expiresAt = Carbon::now()->addMinutes(60);
                 Cache::put('getTimeTable_' . $user_id, $arr, $expiresAt);
-                return response()->json(array('result_code' => 1, 'result_body' => $arr));
+                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
             } else {
-                Log::info('TT CACHE');
                 return response()->json(array('result_code' => 1, 'result_body' => $cached));
             }
-        } catch (\Exception $e){
+        }catch (\Exception $e){
             return response()->json(array('result_code' => 500));
         }
     }
