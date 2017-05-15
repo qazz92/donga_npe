@@ -362,41 +362,53 @@ class DongaController extends Controller
 
     }
 
-    public function getTimeTable(Request $request)
+    public function getTimeTable(Request $request, GetDonga $getDonga)
     {
-        $user_id = $request->input('stuId');
-        $user_pw = $request->input('stuPw');
-        $client = new \Goutte\Client();
-        $guzzleClient = new \GuzzleHttp\Client(array(
-            'timeout' => 90,
-            'verify' => false,
-        ));
-        $client->setClient($guzzleClient);
-        $crawlerLogin = $client->request('GET', 'https://sugang.donga.ac.kr/login.aspx');
-        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
-        $cookies = $client->getCookieJar()->all();
-        $client->getCookieJar()->set($cookies[0]);
-        try {
-            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGPRT.aspx');
-            $cached = Cache::get('getTimeTable_' . $user_id);
-            if ($cached == null) {
-                $arr = array();
-                $crawlerTable->filter('table#reglisthead')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-                    if ($i>10){
-                        $arr[] = trim($node->text());
-                    }
-                });
-                $chArr = array_chunk($arr, 10);
-                $expiresAt = Carbon::now()->addMinutes(60);
-                Cache::put('getTimeTable_' . $user_id, $chArr, $expiresAt);
-                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
-            } else {
-                return response()->json(array('result_code' => 1, 'result_body' => $cached));
-            }
-        }catch (\Exception $e){
-            return response()->json(array('result_code' => 500));
+        $dis = 'student';
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+        if ($result["result_code"] == 1) {
+            $targetPage = 'https://student.donga.ac.kr/Univ/SUG/SSUG0020.aspx?m=3';
+            $user_id = $result["user_id"];
+            $client = $result["client"];
+            $crawlerTable = $client->request('GET', $targetPage);
+            echo $crawlerTable->html();
+        } else {
+            echo "error";
         }
+//        $user_id = $request->input('stuId');
+//        $user_pw = $request->input('stuPw');
+//        $client = new \Goutte\Client();
+//        $guzzleClient = new \GuzzleHttp\Client(array(
+//            'timeout' => 90,
+//            'verify' => false,
+//        ));
+//        $client->setClient($guzzleClient);
+//        $crawlerLogin = $client->request('GET', 'https://sugang.donga.ac.kr/login.aspx');
+//        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+//        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
+//        $cookies = $client->getCookieJar()->all();
+//        $client->getCookieJar()->set($cookies[0]);
+//        try {
+//            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGPRT.aspx');
+//            $cached = Cache::get('getTimeTable_' . $user_id);
+//            if ($cached == null) {
+//                $arr = array();
+//                $crawlerTable->filter('table#reglisthead')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
+//                    if ($i>10){
+//                        $arr[] = trim($node->text());
+//                    }
+//                });
+//                $chArr = array_chunk($arr, 10);
+//                $expiresAt = Carbon::now()->addMinutes(60);
+//                Cache::put('getTimeTable_' . $user_id, $chArr, $expiresAt);
+//                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
+//            } else {
+//                return response()->json(array('result_code' => 1, 'result_body' => $cached));
+//            }
+//        }catch (\Exception $e){
+//            return response()->json(array('result_code' => 500));
+//        }
     }
 
     //클래스 획득
