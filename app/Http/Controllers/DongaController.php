@@ -376,9 +376,10 @@ class DongaController extends Controller
             $crawler = $client->submit($form, array('ddlYear' => 2017, 'ddlSmt' => 10));
             $arr = array();
             $crawler->filter('table#dgRep')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-                if ($i>10){
-                        $arr[] = trim($node->text());
-                }
+//                if ($i>10){
+//                        $arr[] = trim($node->text());
+//                }
+                $arr[] = trim($node->text());
             });
             $chArr = array_chunk($arr, 10);
             return response()->json(array('result_code' => 1, 'result_body' => $chArr));
