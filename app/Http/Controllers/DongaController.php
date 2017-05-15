@@ -374,7 +374,14 @@ class DongaController extends Controller
             $crawlerTable = $client->request('GET', $targetPage);
             $form = $crawlerTable->selectButton('ImageButton1')->form();
             $crawler = $client->submit($form, array('ddlYear' => 2017, 'ddlSmt' => 10));
-            echo $crawler->html();
+            $arr = array();
+            $crawler->filter('table#dgRep')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
+                if ($i>10){
+                        $arr[] = trim($node->text());
+                }
+            });
+            $chArr = array_chunk($arr, 10);
+            return response()->json(array('result_code' => 1, 'result_body' => $chArr));
         } else {
             echo "error";
         }
