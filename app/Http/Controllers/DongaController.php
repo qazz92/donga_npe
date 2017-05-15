@@ -381,7 +381,7 @@ class DongaController extends Controller
 //                }
                 $arr[] = trim($node->text());
             });
-            $chArr = array_chunk($arr, 10);
+            $chArr = array_chunk($arr, 16);
             return response()->json(array('result_code' => 1, 'result_body' => $chArr));
         } else {
             echo "error";
