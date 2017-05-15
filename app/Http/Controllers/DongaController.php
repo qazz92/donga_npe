@@ -372,7 +372,8 @@ class DongaController extends Controller
             $user_id = $result["user_id"];
             $client = $result["client"];
             $crawlerTable = $client->request('GET', $targetPage);
-            echo $crawlerTable->html();
+            $form = $crawlerTable->selectButton('ImageButton1')->form();
+            print_r($form);
         } else {
             echo "error";
         }
