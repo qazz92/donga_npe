@@ -387,7 +387,7 @@ class DongaController extends Controller
                 });
                 $chArr = array_chunk($arr, 15);
                 $expiresAt = Carbon::now()->addMinutes(60);
-                Cache::put('getTimeTable_'.$user_id, $chArr, $expiresAt);
+                Cache::put('getTimeTable_'.$user_id, json_encode($chArr), $expiresAt);
                 return response()->json(array('result_code' => 1, 'result_body' => $chArr));
             } else {
                 echo "error";
