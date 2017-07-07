@@ -18,7 +18,7 @@ $app->get('/privacy', 'MainController@privacy');
 $app->group(['prefix' => 'donga'], function () use ($app) {
     $app->get('meal', 'DongaController@meal');
     $app->post('login','DongaController@dongaUnivLogin');
-//    $app->get('empty', 'DongaController@getEmptyClass');
+    $app->get('empty', 'DongaController@getEmptyClass');
     $app->get('empty/room', 'DongaController@getEmptyRoom');
     $app->get('getWebSeat', 'DongaController@getWebSeat');
     $app->post('getGraduated','DongaController@getGraduated');

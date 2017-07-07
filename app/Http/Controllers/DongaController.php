@@ -364,28 +364,36 @@ class DongaController extends Controller
 
     public function getTimeTable(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
-        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
-        if ($result["result_code"] == 1) {
-            $targetPage = 'https://student.donga.ac.kr/Univ/SUG/SSUG0020.aspx?m=3';
-            $user_id = $result["user_id"];
-            $client = $result["client"];
-            $crawlerTable = $client->request('GET', $targetPage);
-            $form = $crawlerTable->selectButton('ImageButton1')->form();
-            $crawler = $client->submit($form, array('ddlYear' => 2017, 'ddlSmt' => 10));
-            $arr = array();
-            $crawler->filter('table#dgRep')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-                if ($i>15){
-                        $arr[] = trim($node->text());
-                }
-//                $arr[] = trim($node->text());
-            });
-            $chArr = array_chunk($arr, 15);
-            return response()->json(array('result_code' => 1, 'result_body' => $chArr));
+        $stiId = $request->input('stuId');
+        $cached = Cache::get('getTimeTable_'.$stiId);
+        if ($cached != null){
+            return response()->json(array('result_code' => 1, 'result_body' => $cached));
         } else {
-            echo "error";
+            $dis = 'student';
+            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
+            if ($result["result_code"] == 1) {
+                $targetPage = 'https://student.donga.ac.kr/Univ/SUG/SSUG0020.aspx?m=3';
+                $user_id = $result["user_id"];
+                $client = $result["client"];
+                $crawlerTable = $client->request('GET', $targetPage);
+                $form = $crawlerTable->selectButton('ImageButton1')->form();
+                $crawler = $client->submit($form, array('ddlYear' => 2017, 'ddlSmt' => 10));
+                $arr = array();
+                $crawler->filter('table#dgRep')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
+                    if ($i>15){
+                        $arr[] = trim($node->text());
+                    }
+                });
+                $chArr = array_chunk($arr, 15);
+                $expiresAt = Carbon::now()->addMinutes(60);
+                Cache::put('getTimeTable_'.$user_id, $chArr, $expiresAt);
+                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
+            } else {
+                echo "error";
+            }
         }
+
 //        $user_id = $request->input('stuId');
 //        $user_pw = $request->input('stuPw');
 //        $client = new \Goutte\Client();
@@ -419,24 +427,52 @@ class DongaController extends Controller
 //        }catch (\Exception $e){
 //            return response()->json(array('result_code' => 500));
 //        }
-    }
-
-    //클래스 획득
-    public function getEmptyClass()
-    {
-//        $user_id = "1124305";
-//        $user_pw = "Ekfqlc152!";
+//
+//        $user_id = $request->input('stuId');
+//        $user_pw = $request->input('stuPw');
 //        $client = new \Goutte\Client();
 //        $guzzleClient = new \GuzzleHttp\Client(array(
 //            'timeout' => 90,
 //            'verify' => false,
 //        ));
 //        $client->setClient($guzzleClient);
-//        $crawlerLogin = $client->request('GET', 'https://student.donga.ac.kr/Login.aspx');
+//        $crawlerLogin = $client->request('GET', 'https://sugang.donga.ac.kr/login.aspx');
 //        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
 //        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
 //        $cookies = $client->getCookieJar()->all();
 //        $client->getCookieJar()->set($cookies[0]);
+//        try {
+//            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGPRT.aspx');
+//            echo $crawlerTable->html();
+////                $arr = array();
+////                $crawlerTable->filter('table#reglisthead')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
+////                    if ($i>10){
+////                        $arr[] = trim($node->text());
+////                    }
+////                });
+////                $chArr = array_chunk($arr, 10);
+////                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
+//        }catch (\Exception $e){
+//           echo $e;
+//        }
+    }
+
+    //클래스 획득
+    public function getEmptyClass()
+    {
+        $user_id = "1124305";
+        $user_pw = "Ekfqlc152!";
+        $client = new \Goutte\Client();
+        $guzzleClient = new \GuzzleHttp\Client(array(
+            'timeout' => 90,
+            'verify' => false,
+        ));
+        $client->setClient($guzzleClient);
+        $crawlerLogin = $client->request('GET', 'https://student.donga.ac.kr/Login.aspx');
+        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
+        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
+        $cookies = $client->getCookieJar()->all();
+        $client->getCookieJar()->set($cookies[0]);
 //        $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUE/SSUE0040.aspx?m=2&bld=63');
 //        $crawlerRoom = $crawlerTable->filter('table#dgRoomList');
 //        $keys = array();
@@ -450,39 +486,39 @@ class DongaController extends Controller
 //         for ($i = 0;$i<count($keys);$i++){
 //             Room::create(array('room_no'=>$values[$i],'room_name'=>$keys[$i]));
 //         }
-//        $rooms =  Room::all('id','room_no');
-//        $auto = 1;
-//        foreach ($rooms as $room)
-//        {
-//
-//            $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUE/SSUE0041_75.aspx?m=2&id='.$room->room_no.'&bld=63');
-//            $form2 = $crawlerTable->selectButton('ibtnSearch')->form();
-//            $crawler2 = $client->submit($form2, array('ddlYear' => "2017", 'ddlSmt' => "10"));
-//            for ($j=1;$j<6;$j++){
-//                $arr = array();
-//                $crawler2->filter('table#gvList')->filter('tr')
-//                    ->each(function ($node) use (&$arr,&$j){
-//                        $arr[] = $node->filter('td')->eq($j)->text();
-//                    });
-//                for ($i=1;$i<count($arr);$i++){
-//                    if ($arr[$i]===" "){
-////                        echo $i." 빈 강의실<br/>";
-////                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>"빈 강의실","subject_name"=>"빈 강의실","room_id"=>$room->id));
-//                        file_put_contents('/Users/qazz/test2.txt',$auto.','.$j.','.$i.','.'빈 강의실,빈 강의실,'.$room->id.';',FILE_APPEND);
-//                        $auto = $auto + 1;
-//                    }else {
-//                        $removeRoom = str_replace($room->room_no,"",$arr[$i]);
-//                        $splitNo = str_replace('&nbsp'," ",$removeRoom);
-//                        $splitNo = preg_replace('/^([^\s]+)\s/','$1,',$splitNo);
-//                        $finalResult = explode(',',$splitNo);
-////                        echo $i.' '.$finalResult[0].'  |   '.$finalResult[1].'<br/>';
-////                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>$finalResult[0],"subject_name"=>$finalResult[1],"room_id"=>$room->id));
-//                        file_put_contents('/Users/qazz/test2.txt',$auto.','.$j.','.$i.','.$finalResult[0].','.$finalResult[1].','.$room->id.';',FILE_APPEND);
-//                        $auto = $auto + 1;
-//                    }
-//                }
-//            }
-//        }
+        $rooms =  Room::all('id','room_no');
+        $auto = 1;
+        foreach ($rooms as $room)
+        {
+
+            $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUE/SSUE0041_75.aspx?m=2&id='.$room->room_no.'&bld=63');
+            $form2 = $crawlerTable->selectButton('ibtnSearch')->form();
+            $crawler2 = $client->submit($form2, array('ddlYear' => "2017", 'ddlSmt' => "10"));
+            for ($j=1;$j<6;$j++){
+                $arr = array();
+                $crawler2->filter('table#gvList')->filter('tr')
+                    ->each(function ($node) use (&$arr,&$j){
+                        $arr[] = $node->filter('td')->eq($j)->text();
+                    });
+                for ($i=1;$i<count($arr);$i++){
+                    if ($arr[$i]===" "){
+//                        echo $i." 빈 강의실<br/>";
+//                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>"빈 강의실","subject_name"=>"빈 강의실","room_id"=>$room->id));
+                        file_put_contents('/Users/qazz/test2.txt',$auto.','.$j.','.$i.','.'빈 강의실,빈 강의실,'.$room->id.';',FILE_APPEND);
+                        $auto = $auto + 1;
+                    }else {
+                        $removeRoom = str_replace($room->room_no,"",$arr[$i]);
+                        $splitNo = str_replace('&nbsp'," ",$removeRoom);
+                        $splitNo = preg_replace('/^([^\s]+)\s/','$1,',$splitNo);
+                        $finalResult = explode(',',$splitNo);
+//                        echo $i.' '.$finalResult[0].'  |   '.$finalResult[1].'<br/>';
+//                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>$finalResult[0],"subject_name"=>$finalResult[1],"room_id"=>$room->id));
+                        file_put_contents('/Users/qazz/test2.txt',$auto.','.$j.','.$i.','.$finalResult[0].','.$finalResult[1].','.$room->id.';',FILE_APPEND);
+                        $auto = $auto + 1;
+                    }
+                }
+            }
+        }
 
     }
 
