@@ -367,7 +367,7 @@ class DongaController extends Controller
         $stiId = $request->input('stuId');
         $cached = Cache::get('getTimeTable_'.$stiId);
         if ($cached != null){
-            return response()->json(array('result_code' => 1, 'result_body' => $cached));
+            return response()->json(array('result_code' => 1, 'result_body' => json_decode($cached)));
         } else {
             $dis = 'student';
             $loginPage = 'https://student.donga.ac.kr/Login.aspx';
