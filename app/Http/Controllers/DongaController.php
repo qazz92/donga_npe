@@ -229,20 +229,20 @@ class DongaController extends Controller
     }
     public function getGraduated(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
-        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
-        if ($result["result_code"] == 1) {
-            $targetPage = 'https://student.donga.ac.kr/Univ/SUI/SSUI0050.aspx?m=7';
-            $user_id = $result["user_id"];
-            $client = $result["client"];
-            $crawlerTable = $client->request('GET', $targetPage);
-            $cached = Cache::get('getGraduated_' . $user_id);
-            if (!$cached == null) {
-                Log::info('GRA CACHE');
-                return response()->json($cached);
-            } else {
-                Log::info('GRA CRAWLER');
+        $stiId = $request->input('stuId');
+        $cached = Cache::get('getGraduated_'.$stiId);
+        if ($cached != null){
+            Log::info('GRA CACHED');
+            return response()->json($cached);
+        } else {
+            Log::info('GRA CRAWLER');
+            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
+            if ($result["result_code"] == 1) {
+                $targetPage = 'https://student.donga.ac.kr/Univ/SUI/SSUI0050.aspx?m=7';
+                $user_id = $result["user_id"];
+                $client = $result["client"];
+                $crawlerTable = $client->request('GET', $targetPage);
                 try {
                     $keys = array('multi', 'sub', 'rel', 'year', 'avgGrade', 'early', 'smart');
                     $values = array();
@@ -292,29 +292,29 @@ class DongaController extends Controller
                 } catch (\Exception $e) {
                     return response()->json(array('result_code' => 500));
                 }
+            }else {
+                return response()->json(["result_code" => $result["result_code"]]);
             }
-        } else {
-            return response()->json(["result_code" => $result["result_code"]]);
         }
     }
 
     public function getAllGrade(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
-        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
-        if ($result["result_code"] == 1) {
-            $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6';
-            $user_id = $result["user_id"];
-            $client = $result["client"];
-            $crawlerTable = $client->request('GET', $targetPage);
-            $cached = Cache::get('getAllGrade_' . $user_id);
-            if (!$cached == null) {
-                Log::info('ALL CACHE');
-                return response()->json($cached);
-            } else {
-                Log::info('ALL CRAWLER');
+        $stiId = $request->input('stuId');
+        $cached = Cache::get('getAllGrade_' . $stiId);
+        if (!$cached == null) {
+            Log::info('ALL CACHE');
+            return response()->json($cached);
+        } else {
+            Log::info('ALL CRAWLER');
 
+            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
+            if ($result["result_code"] == 1) {
+                $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0011.aspx?m=6';
+                $user_id = $result["user_id"];
+                $client = $result["client"];
+                $crawlerTable = $client->request('GET', $targetPage);
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 8);
                     $expiresAt = Carbon::now()->addMinutes(60);
@@ -323,30 +323,31 @@ class DongaController extends Controller
                 } catch (\Exception $e) {
                     return response()->json(array('result_code' => 500));
                 }
+            } else {
+                return response()->json(["result_code" => $result["result_code"]]);
             }
-        } else {
-            return response()->json(["result_code" => $result["result_code"]]);
         }
+
     }
 
     function getSpeGrade(Request $request, GetDonga $getDonga)
     {
-        $dis = 'student';
-        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage,$dis);
-        if ($result["result_code"] == 1) {
-            $year = $request->input('year');
-            $smt = $request->input('smt');
-            $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0012.aspx?m=6&year=' . $year . '&smt=' . $smt;
-            $client = $result["client"];
-            $user_id = $result["user_id"];
-            $crawlerTable = $client->request('GET', $targetPage);
-            $cached = Cache::get('getSpeGrade_'.$year.$smt.$user_id);
-            if (!$cached == null) {
-                Log::info('SPE CACHE');
-                return response()->json($cached);
-            } else {
-                Log::info('SPE CRAWLER');
+        $stiId = $request->input('stuId');
+        $year = $request->input('year');
+        $smt = $request->input('smt');
+        $cached = Cache::get('getSpeGrade_' . $year . $smt . $stiId);
+        if (!$cached == null) {
+            Log::info('SPE CACHE');
+            return response()->json($cached);
+        } else {
+            Log::info('SPE CRAWLER');
+            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
+            if ($result["result_code"] == 1) {
+                $targetPage = 'https://student.donga.ac.kr/Univ/SUH/SSUH0012.aspx?m=6&year=' . $year . '&smt=' . $smt;
+                $client = $result["client"];
+                $user_id = $result["user_id"];
+                $crawlerTable = $client->request('GET', $targetPage);
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 10);
                     $expiresAt = Carbon::now()->addMinutes(60);
@@ -355,11 +356,10 @@ class DongaController extends Controller
                 } catch (\Exception $e) {
                     return response()->json(array('result_code' => 500));
                 }
+            }else {
+                return response()->json(["result_code" => $result["result_code"]]);
             }
-        } else {
-            return response()->json(["result_code" => $result["result_code"]]);
         }
-
     }
 
     public function getTimeTable(Request $request, GetDonga $getDonga)
@@ -390,7 +390,7 @@ class DongaController extends Controller
                 Cache::put('getTimeTable_'.$user_id, json_encode($chArr), $expiresAt);
                 return response()->json(array('result_code' => 1, 'result_body' => $chArr));
             } else {
-                echo "error";
+                return response()->json(["result_code" => $result["result_code"]]);
             }
         }
 
