@@ -328,7 +328,14 @@ class DongaController extends Controller
                     Cache::put('getGraduated_' . $user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
-                    return response()->json(array('result_code' => 500));
+                    $fail = $result["page"]->filter("span#lblError")->text();
+                    if (str_contains($fail,"학번")){
+                        $result_code = 3;
+                    }
+                    else {
+                        $result_code = 500;
+                    }
+                    return response()->json(array('result_code' => $result_code));
                 }
             }else {
                 return response()->json(["result_code" => $result["result_code"]]);
@@ -359,7 +366,14 @@ class DongaController extends Controller
                     Cache::put('getAllGrade_' . $user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
-                    return response()->json(array('result_code' => 500));
+                    $fail = $result["page"]->filter("span#lblError")->text();
+                    if (str_contains($fail,"학번")){
+                        $result_code = 3;
+                    }
+                    else {
+                        $result_code = 500;
+                    }
+                    return response()->json(array('result_code' => $result_code));
                 }
             } else {
                 return response()->json(["result_code" => $result["result_code"]]);
@@ -392,7 +406,14 @@ class DongaController extends Controller
                     Cache::put('getSpeGrade_'.$year.$smt.$user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
-                    return response()->json(array('result_code' => 500));
+                    $fail = $result["page"]->filter("span#lblError")->text();
+                    if (str_contains($fail,"학번")){
+                        $result_code = 3;
+                    }
+                    else {
+                        $result_code = 500;
+                    }
+                    return response()->json(array('result_code' => $result_code));
                 }
             }else {
                 return response()->json(["result_code" => $result["result_code"]]);
@@ -414,19 +435,31 @@ class DongaController extends Controller
                 $targetPage = 'https://student.donga.ac.kr/Univ/SUG/SSUG0020.aspx?m=3';
                 $user_id = $result["user_id"];
                 $client = $result["client"];
-                $crawlerTable = $client->request('GET', $targetPage);
-                $form = $crawlerTable->selectButton('ImageButton1')->form();
-                $crawler = $client->submit($form, array('ddlYear' => 2017, 'ddlSmt' => 10));
-                $arr = array();
-                $crawler->filter('table#dgRep')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-                    if ($i>15){
-                        $arr[] = trim($node->text());
+
+                try {
+                    $crawlerTable = $client->request('GET', $targetPage);
+                    $form = $crawlerTable->selectButton('ImageButton1')->form();
+                    $crawler = $client->submit($form, array('ddlYear' => 2017, 'ddlSmt' => 10));
+                    $arr = array();
+                    $crawler->filter('table#dgRep')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
+                        if ($i>15){
+                            $arr[] = trim($node->text());
+                        }
+                    });
+                    $chArr = array_chunk($arr, 15);
+                    $expiresAt = Carbon::now()->addMinutes(60);
+                    Cache::put('getTimeTable_'.$user_id, json_encode($chArr), $expiresAt);
+                    return response()->json(array('result_code' => 1, 'result_body' => $chArr));
+                } catch (\Exception $e){
+                    $fail = $result["page"]->filter("span#lblError")->text();
+                    if (str_contains($fail,"학번")){
+                        $result_code = 3;
                     }
-                });
-                $chArr = array_chunk($arr, 15);
-                $expiresAt = Carbon::now()->addMinutes(60);
-                Cache::put('getTimeTable_'.$user_id, json_encode($chArr), $expiresAt);
-                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
+                    else {
+                        $result_code = 500;
+                    }
+                    return response()->json(array('result_code' => $result_code));
+                }
             } else {
                 return response()->json(["result_code" => $result["result_code"]]);
             }

@@ -33,8 +33,8 @@ class GetDonga
             $client->setClient($guzzleClient);
             $crawlerLogin = $client->request('GET', $loginPage);
             $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-            $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
-            return array('result_code' => 1, 'client' => $client, 'user_id' => $this->user_id);
+            $page = $client->submit($form, array('txtStudentCd' => $this->user_id, 'txtPasswd' => $this->user_pw));
+            return array('result_code' => 1, 'client' => $client, 'page'=>$page ,'user_id' => $this->user_id);
         } catch (\Exception $e) {
             return array('result_code' => 500);
 //            echo $e;
