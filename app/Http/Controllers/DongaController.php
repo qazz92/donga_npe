@@ -96,7 +96,14 @@ class DongaController extends Controller
                             return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
                         }
                 } catch (\Exception $e) {
-                    return response()->json(array("result_code" => 500));
+                    $fail = $result["page"]->filter("span#lblError")->text();
+                    if (str_contains($fail,"학번")){
+                        $result_code = 3;
+                    }
+                    else {
+                        $result_code = 500;
+                    }
+                    return response()->json(array('result_code' => $result_code));
                 }
             } else {
             return response()->json(["result_code" => $result["result_code"]]);

@@ -26,6 +26,8 @@ class FCMHandler
     /** @var string FCM 알림 본문 */
     private $body;
 
+    private $content_available;
+
     /** @var array 전송 실패시 재시도 간격 */
     private $retryIntervals = [1, 2, 4];
 
@@ -84,7 +86,7 @@ class FCMHandler
     {
         $this->title = $title;
         $this->body = $body;
-
+        $this->content_available = true;
         return $this;
     }
 
@@ -166,7 +168,7 @@ class FCMHandler
         $post =  $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
-            null,
+            $this->buildNotification("BOO","알림"),
             $this->buildPayload()
         );
         return $post;

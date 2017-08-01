@@ -30,7 +30,6 @@ class MainController extends Controller
         $now = Carbon::now();
         echo $now;
     }
-
     //동아리 회장 회원가입
     public function reg(Request $request)
     {
