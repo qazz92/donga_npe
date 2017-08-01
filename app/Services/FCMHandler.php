@@ -197,7 +197,7 @@ class FCMHandler
         }
 
         $optionBuilder = new OptionsBuilder();
-
+        $optionBuilder->setContentAvailable(true);
         // 필요한 옵션을 더 줄 수 있다.
         // $optionBuilder->setCollapseKey('collapse_key');
         // $optionBuilder->setDelayWhileIdle(true);
