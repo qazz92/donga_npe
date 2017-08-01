@@ -219,7 +219,7 @@ class FCMHandler
         }
 
         $notificationBuilder = new PayloadNotificationBuilder();
-        $notificationBuilder->setTitle($title)->setBody($body)->setSound('default');
+        $notificationBuilder->setTitle($title)->setBody($body)->setContentAvailable(true)->setSound('default');
 
         return $this->cache['notificationBuilder'] = $notificationBuilder->build();
     }
