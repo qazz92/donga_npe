@@ -291,6 +291,7 @@ class FCMHandler
 
         $rawRequest = json_encode([
             'to' => $this->getTo(),
+            'option'=>$this->buildOption(),
             'notification' => [
                 'title' => $this->title,
                 'body' => $this->body,
