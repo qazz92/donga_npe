@@ -191,10 +191,10 @@ class FCMHandler
      */
     protected function buildOption()
     {
-        if (array_key_exists('optionBuilder', $this->cache)) {
-            // 캐시 되어 있으면 캐시를 사용한다.
-            return $this->cache['optionBuilder'];
-        }
+//        if (array_key_exists('optionBuilder', $this->cache)) {
+//            // 캐시 되어 있으면 캐시를 사용한다.
+//            return $this->cache['optionBuilder'];
+//        }
 
         $optionBuilder = new OptionsBuilder();
         $optionBuilder->setContentAvailable(true);
