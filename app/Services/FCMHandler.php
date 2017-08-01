@@ -168,7 +168,7 @@ class FCMHandler
         $post =  $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
-            $this->buildNotification("BOO","알림"),
+            $this->buildNotification("test","test"),
             $this->buildPayload()
         );
         return $post;
@@ -191,10 +191,10 @@ class FCMHandler
      */
     protected function buildOption()
     {
-//        if (array_key_exists('optionBuilder', $this->cache)) {
-//            // 캐시 되어 있으면 캐시를 사용한다.
-//            return $this->cache['optionBuilder'];
-//        }
+        if (array_key_exists('optionBuilder', $this->cache)) {
+            // 캐시 되어 있으면 캐시를 사용한다.
+            return $this->cache['optionBuilder'];
+        }
 
         $optionBuilder = new OptionsBuilder();
         $optionBuilder->setContentAvailable(true);
@@ -294,6 +294,7 @@ class FCMHandler
             'notification' => [
                 'title' => $this->title,
                 'body' => $this->body,
+                'content_available'=>$this->content_available,
             ],
             'data' => $this->data,
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
