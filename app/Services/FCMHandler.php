@@ -168,7 +168,7 @@ class FCMHandler
         $post =  $fcmSender->sendTo(
             $this->getTo(),
             $this->buildOption(),
-            $this->buildNotification("test","test"),
+            $this->buildNotification($this->title,$this->body),
             $this->buildPayload()
         );
         return $post;
@@ -198,6 +198,7 @@ class FCMHandler
 
         $optionBuilder = new OptionsBuilder();
         $optionBuilder->setContentAvailable(true);
+        $optionBuilder->setPriority("high");
         // 필요한 옵션을 더 줄 수 있다.
         // $optionBuilder->setCollapseKey('collapse_key');
         // $optionBuilder->setDelayWhileIdle(true);
@@ -291,7 +292,6 @@ class FCMHandler
 
         $rawRequest = json_encode([
             'to' => $this->getTo(),
-            'option'=>$this->cache['optionBuilder'],
             'notification' => [
                 'title' => $this->title,
                 'body' => $this->body,
