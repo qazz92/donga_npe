@@ -236,6 +236,7 @@ class MainController extends Controller
     }
     public function removeNormalNotis(Request $request){
         $targets = $request->input('targets');
+        Log::info("target : ".$targets);
         try {
             Noti::destroy($targets);
             return response(array('result_code'=>1));
