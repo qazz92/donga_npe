@@ -65,93 +65,93 @@ class DongaController extends Controller
 
     public function dongaUnivLogin(Request $request, GetDonga $getDonga)
     {
-        $stuId = $request->input('stuId');
-        $getID = Normal_User::where('stuId', '=', $stuId)->get();
-        if ($getID->isEmpty()){
-            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
-            if ($result["result_code"] == 1) {
-                $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
-                $user_id = $result["user_id"];
-                $client = $result["client"];
-                $crawlerTable = $client->request('GET', $targetPage);
-                try {
-                    $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
-                    $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
-                    $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
-                    $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
-                    $user = new Normal_User();
-                        try {
-                            $user->stuId = $user_id;
-                            $user->name = $name;
-                            $user->coll = $coll;
-                            $user->major = $major;
-                            $result = $user->save();
-                            if ($result) {
-                                return response()->json(["result_code" => 1, "result_body" => $user]);
-                            } else {
-                                return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
-                            }
-                        } catch (\Exception $e) {
-                            return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
-                        }
-                } catch (\Exception $e) {
-                    $fail = $result["page"]->filter("span#lblError")->text();
-                    if (str_contains($fail,"학번")){
-                        $result_code = 3;
-                    }
-                    else {
-                        $result_code = 500;
-                    }
-                    return response()->json(array('result_code' => $result_code));
-                }
-            } else {
-            return response()->json(["result_code" => $result["result_code"]]);
-            }
-        } else {
-            return response()->json(array("result_code" => 1, "result_body" => $getID[0]));
-        }
-//        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-//        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
-//        if ($result["result_code"] == 1) {
-//            $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
-//            $user_id = $result["user_id"];
-//            $client = $result["client"];
-//
-//            $crawlerTable = $client->request('GET', $targetPage);
-//            try {
-//                $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
-//                $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
-//                $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
-//                $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
-//                $getID = Normal_User::where('stuId', '=', $user_id)->get();
-//                if ($getID->isEmpty()) {
+//        $stuId = $request->input('stuId');
+//        $getID = Normal_User::where('stuId', '=', $stuId)->get();
+//        if ($getID->isEmpty()){
+//            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+//            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
+//            if ($result["result_code"] == 1) {
+//                $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
+//                $user_id = $result["user_id"];
+//                $client = $result["client"];
+//                $crawlerTable = $client->request('GET', $targetPage);
+//                try {
+//                    $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
+//                    $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
+//                    $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
+//                    $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
 //                    $user = new Normal_User();
-//                    try {
-//                        $user->stuId = $user_id;
-//                        $user->name = $name;
-//                        $user->coll = $coll;
-//                        $user->major = $major;
-//                        $result = $user->save();
-//                        if ($result) {
-//                            return response()->json(["result_code" => 1, "result_body" => $user]);
-//                        } else {
+//                        try {
+//                            $user->stuId = $user_id;
+//                            $user->name = $name;
+//                            $user->coll = $coll;
+//                            $user->major = $major;
+//                            $result = $user->save();
+//                            if ($result) {
+//                                return response()->json(["result_code" => 1, "result_body" => $user]);
+//                            } else {
+//                                return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
+//                            }
+//                        } catch (\Exception $e) {
 //                            return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
 //                        }
-//                    } catch (\Exception $e) {
-//                        echo $e;
-//                        return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
+//                } catch (\Exception $e) {
+//                    $fail = $result["page"]->filter("span#lblError")->text();
+//                    if (str_contains($fail,"학번")){
+//                        $result_code = 3;
 //                    }
-//                } else {
-//                    return response()->json(array("result_code" => 1, "result_body" => $getID[0]));
+//                    else {
+//                        $result_code = 500;
+//                    }
+//                    return response()->json(array('result_code' => $result_code));
 //                }
-//            } catch (\Exception $e){
-//                return response()->json(array("result_code" => 500));
-//            }
-//
-//        } else {
+//            } else {
 //            return response()->json(["result_code" => $result["result_code"]]);
+//            }
+//        } else {
+//            return response()->json(array("result_code" => 1, "result_body" => $getID[0]));
 //        }
+        $loginPage = 'https://student.donga.ac.kr/Login.aspx';
+        $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
+        if ($result["result_code"] == 1) {
+            $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
+            $user_id = $result["user_id"];
+            $client = $result["client"];
+
+            $crawlerTable = $client->request('GET', $targetPage);
+            try {
+                $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
+                $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
+                $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
+                $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
+                $getID = Normal_User::where('stuId', '=', $user_id)->get();
+                if ($getID->isEmpty()) {
+                    $user = new Normal_User();
+                    try {
+                        $user->stuId = $user_id;
+                        $user->name = $name;
+                        $user->coll = $coll;
+                        $user->major = $major;
+                        $result = $user->save();
+                        if ($result) {
+                            return response()->json(["result_code" => 1, "result_body" => $user]);
+                        } else {
+                            return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
+                        }
+                    } catch (\Exception $e) {
+                        echo $e;
+                        return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
+                    }
+                } else {
+                    return response()->json(array("result_code" => 1, "result_body" => $getID[0]));
+                }
+            } catch (\Exception $e){
+                return response()->json(array("result_code" => 500));
+            }
+
+        } else {
+            return response()->json(["result_code" => $result["result_code"]]);
+        }
     }
 
     public function removeCircle(Request $request){
