@@ -78,7 +78,7 @@ class AdminController extends Controller
             $message = ['contents' => $article,'category'=>'normal'];
         try {
 //            $fcm->to(array_values($to))->notification($title, $body)->data($message)->send();
-            $fcm->to(array_values($to))->data($message)->send();
+            $fcm->to(array_values($to))->notification("boo","test")->data($message)->send();
         } catch (\Exception $e) {
             return response()->json([
                 'result_code' => 500
