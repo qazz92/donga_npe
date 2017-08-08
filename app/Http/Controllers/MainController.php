@@ -94,7 +94,7 @@ class MainController extends Controller
         $device_id = $request->input("device_id");
         $push_service_id = $request->input("push_service_id");
         try {
-            $getDevice = Device::where('device_id', '=', $device_id)->get();
+            $getDevice = Device::where('device_id', '=', $device_id)->orderBy('updated_at', 'desc')->get();
             $getDevice[0]->push_service_id = $push_service_id;
             $getDevice[0]->save();
             return response()->json(["result_code" => $identi_ok]);
