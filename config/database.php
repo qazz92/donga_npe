@@ -67,7 +67,7 @@ return [
             'charset'   => env('DB_CHARSET', 'utf8'),
             'collation' => env('DB_COLLATION', 'utf8_unicode_ci'),
             'prefix'    => env('DB_PREFIX', ''),
-            'timezone'  => env('DB_TIMEZONE', '+00:00'),
+            'timezone'  => env('DB_TIMEZONE', '+09:00'),
             'strict'    => env('DB_STRICT_MODE', false),
             'options'    => [PDO::MYSQL_ATTR_LOCAL_INFILE=>true],
         ],
