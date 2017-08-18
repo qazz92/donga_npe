@@ -433,7 +433,7 @@ class DongaController extends Controller
         $stiId = $request->input('stuId');
         $redisTimeTable = Redis::get('getTimeTable_'.$stiId);
         if ($redisTimeTable != null){
-            return response()->json(array('result_code' => 1, 'result_body' => json_decode($cached)));
+            return response()->json(array('result_code' => 1, 'result_body' => json_decode($redisTimeTable)));
         } else {
             $dis = 'student';
             $loginPage = 'https://student.donga.ac.kr/Login.aspx';
