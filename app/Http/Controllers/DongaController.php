@@ -431,8 +431,8 @@ class DongaController extends Controller
     public function getTimeTable(Request $request, GetDonga $getDonga)
     {
         $stiId = $request->input('stuId');
-        $cached = Cache::get('getTimeTable_'.$stiId);
-        if ($cached != null){
+        $redisTimeTable = Redis::get('getTimeTable_'.$stiId);
+        if ($redisTimeTable != null){
             return response()->json(array('result_code' => 1, 'result_body' => json_decode($cached)));
         } else {
             $dis = 'student';
@@ -454,8 +454,9 @@ class DongaController extends Controller
                         }
                     });
                     $chArr = array_chunk($arr, 15);
-                    $expiresAt = Carbon::now()->addMinutes(60);
-                    Cache::put('getTimeTable_'.$user_id, json_encode($chArr), $expiresAt);
+//                    $expiresAt = Carbon::now()->addMinutes(60);
+//                    Cache::put('getTimeTable_'.$user_id, json_encode($chArr), $expiresAt);
+                    Redis::set('getTimeTable_'.$user_id,  json_encode($chArr));
                     return response()->json(array('result_code' => 1, 'result_body' => $chArr));
                 } catch (\Exception $e){
                     $fail = $result["page"]->filter("span#lblError")->text();
