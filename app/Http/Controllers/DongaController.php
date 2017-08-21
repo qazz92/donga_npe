@@ -275,7 +275,8 @@ class DongaController extends Controller
     public function getGraduated(Request $request, GetDonga $getDonga)
     {
         $stiId = $request->input('stuId');
-        $cached = Cache::get('getGraduated_'.$stiId);
+        $cached = Redis::get('getGraduated_'.$stiId);
+//        $cached = Cache::get('getGraduated_'.$stiId);
         if ($cached != null){
             Log::info('GRA CACHED');
             return response()->json($cached);
@@ -331,8 +332,9 @@ class DongaController extends Controller
                     $info = array_combine($keys, $values);
                     $result = array('result_code' => 1, 'result_body' => array('info' => $info, 'title' => $title, 'title2' => $title2, 'need' => $need,
                         'get' => $get, 'pm' => $pm));
-                    $expiresAt = Carbon::now()->addMinutes(60);
-                    Cache::put('getGraduated_' . $user_id, $result, $expiresAt);
+                    Redis::set('getGraduated_' . $user_id, json_encode($result));
+//                    $expiresAt = Carbon::now()->addMinutes(60);
+//                    Cache::put('getGraduated_' . $user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
                     $fail = $result["page"]->filter("span#lblError")->text();
@@ -585,7 +587,7 @@ class DongaController extends Controller
                     if ($arr[$i]===" "){
 //                        echo $i." 빈 강의실<br/>";
 //                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>"빈 강의실","subject_name"=>"빈 강의실","room_id"=>$room->id));
-                        file_put_contents('/Users/qazz/test2.txt',$auto.','.$j.','.$i.','.'빈 강의실,빈 강의실,'.$room->id.';',FILE_APPEND);
+                        file_put_contents('/Users/qazz92/test2.txt',$auto.','.$j.','.$i.','.'빈 강의실,빈 강의실,'.$room->id.';',FILE_APPEND);
                         $auto = $auto + 1;
                     }else {
                         $removeRoom = str_replace($room->room_no,"",$arr[$i]);
@@ -594,7 +596,7 @@ class DongaController extends Controller
                         $finalResult = explode(',',$splitNo);
 //                        echo $i.' '.$finalResult[0].'  |   '.$finalResult[1].'<br/>';
 //                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>$finalResult[0],"subject_name"=>$finalResult[1],"room_id"=>$room->id));
-                        file_put_contents('/Users/qazz/test2.txt',$auto.','.$j.','.$i.','.$finalResult[0].','.$finalResult[1].','.$room->id.';',FILE_APPEND);
+                        file_put_contents('/Users/qazz92/test2.txt',$auto.','.$j.','.$i.','.$finalResult[0].','.$finalResult[1].','.$room->id.';',FILE_APPEND);
                         $auto = $auto + 1;
                     }
                 }
