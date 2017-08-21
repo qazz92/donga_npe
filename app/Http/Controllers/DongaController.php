@@ -279,7 +279,7 @@ class DongaController extends Controller
 //        $cached = Cache::get('getGraduated_'.$stiId);
         if ($cached != null){
             Log::info('GRA CACHED');
-            return response()->json($cached);
+            return response()->json(json_decode($cached));
         } else {
             Log::info('GRA CRAWLER');
             $loginPage = 'https://student.donga.ac.kr/Login.aspx';
