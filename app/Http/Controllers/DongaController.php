@@ -552,8 +552,10 @@ class DongaController extends Controller
         $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
         $cookies = $client->getCookieJar()->all();
         $client->getCookieJar()->set($cookies[0]);
-        $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUE/SSUE0040.aspx?m=2&bld=63');
-        $crawlerRoom = $crawlerTable->filter('table#dgRoomList');
+        $crawlerTable = $client->request('GET', 'https://student.donga.ac.kr/Univ/SUE/SSUE0040.aspx?m=2');
+        $form = $crawlerTable->selectButton('ibtnSearch')->form();
+        $page = $client->submit($form, array('ddlBld' => "B04"));
+        $crawlerRoom = $page->filter('table#dgRoomList');
         $keys = array();
         $values = array();
         $crawlerRoom->filter('a')->each(function ($node) use(&$keys) {
