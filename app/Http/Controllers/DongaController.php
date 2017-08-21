@@ -398,7 +398,7 @@ class DongaController extends Controller
         $stiId = $request->input('stuId');
         $year = $request->input('year');
         $smt = $request->input('smt');
-        $cached = Redis::get('getSpeGrade_' . $year .'/'. $smt .'-'. $stiId);
+        $cached = Redis::get('getSpeGrade_' . $year . $smt .'|'. $stiId);
 
 //        $cached = Cache::get('getSpeGrade_' . $year . $smt . $stiId);
         if (!$cached == null) {
@@ -415,7 +415,7 @@ class DongaController extends Controller
                 $crawlerTable = $client->request('GET', $targetPage);
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 10);
-                    Redis::set('getSpeGrade_' . $year .'/'. $smt .'-'. $stiId, json_encode($result));
+                    Redis::set('getSpeGrade_' . $year . $smt .'|'. $stiId, json_encode($result));
 //                    $expiresAt = Carbon::now()->addMinutes(60);
 //                    Cache::put('getSpeGrade_'.$year.$smt.$user_id, $result, $expiresAt);
                     return response()->json($result);
