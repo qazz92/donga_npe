@@ -355,10 +355,11 @@ class DongaController extends Controller
     public function getAllGrade(Request $request, GetDonga $getDonga)
     {
         $stiId = $request->input('stuId');
-        $cached = Cache::get('getAllGrade_' . $stiId);
+        $cached = Redis::get('getAllGrade_' . $stiId);
+//        $cached = Cache::get('getAllGrade_' . $stiId);
         if (!$cached == null) {
             Log::info('ALL CACHE');
-            return response()->json($cached);
+            return response()->json(json_decode($cached));
         } else {
             Log::info('ALL CRAWLER');
 
@@ -371,8 +372,9 @@ class DongaController extends Controller
                 $crawlerTable = $client->request('GET', $targetPage);
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 8);
-                    $expiresAt = Carbon::now()->addMinutes(60);
-                    Cache::put('getAllGrade_' . $user_id, $result, $expiresAt);
+                    Redis::set('getAllGrade_' . $user_id, json_encode($result));
+//                    $expiresAt = Carbon::now()->addMinutes(60);
+//                    Cache::put('getAllGrade_' . $user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
                     $fail = $result["page"]->filter("span#lblError")->text();
@@ -396,10 +398,12 @@ class DongaController extends Controller
         $stiId = $request->input('stuId');
         $year = $request->input('year');
         $smt = $request->input('smt');
-        $cached = Cache::get('getSpeGrade_' . $year . $smt . $stiId);
+        $cached = Redis::get('getSpeGrade_' . $year . $smt . $stiId);
+
+//        $cached = Cache::get('getSpeGrade_' . $year . $smt . $stiId);
         if (!$cached == null) {
             Log::info('SPE CACHE');
-            return response()->json($cached);
+            return response()->json(json_decode($cached));
         } else {
             Log::info('SPE CRAWLER');
             $loginPage = 'https://student.donga.ac.kr/Login.aspx';
@@ -411,8 +415,9 @@ class DongaController extends Controller
                 $crawlerTable = $client->request('GET', $targetPage);
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 10);
-                    $expiresAt = Carbon::now()->addMinutes(60);
-                    Cache::put('getSpeGrade_'.$year.$smt.$user_id, $result, $expiresAt);
+                    Redis::set('getSpeGrade_'.$year.$smt.$user_id, json_encode($result));
+//                    $expiresAt = Carbon::now()->addMinutes(60);
+//                    Cache::put('getSpeGrade_'.$year.$smt.$user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
                     $fail = $result["page"]->filter("span#lblError")->text();
