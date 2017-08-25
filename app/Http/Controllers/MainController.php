@@ -101,14 +101,13 @@ class MainController extends Controller
         $push_service_id = $request->input("push_service_id");
         $normal_user_id = $request->input("normal_user_id");
 
-//        $result_row = DB::table('devices')
-//            ->select('id')
-//            ->where('user_id','=',$normal_user_id)
-//            ->orderBy('updated_at', 'desc')
-//            ->limit(100)
-//            ->offset(1)
-//            ->delete();
-        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
+        $result_row = DB::table('devices')
+            ->where('user_id','=',$normal_user_id)
+            ->orderBy('updated_at', 'desc')
+            ->limit(100)
+            ->offset(2)
+            ->delete();
+//        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
 //        $result_row = DB::delete(DB::raw("DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id=".$normal_user_id." ORDER BY updated_at DESC LIMIT 100 OFFSET 1)"));
 
         Log::info($normal_user_id."의 devices ".$result_row." 개 지워졌습니다.");
