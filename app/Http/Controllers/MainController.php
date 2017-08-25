@@ -108,8 +108,8 @@ class MainController extends Controller
 //            ->limit(100)
 //            ->offset(1)
 //            ->delete();
-
-        $result_row = DB::raw("DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id=".$normal_user_id." ORDER BY updated_at DESC LIMIT 100 OFFSET 1)");
+        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
+//        $result_row = DB::delete(DB::raw("DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id=".$normal_user_id." ORDER BY updated_at DESC LIMIT 100 OFFSET 1)"));
 
         Log::info($normal_user_id."의 devices ".$result_row." 개 지워졌습니다.");
 
