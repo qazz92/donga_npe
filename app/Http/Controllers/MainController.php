@@ -112,10 +112,9 @@ class MainController extends Controller
             ->where('user_id','=',$normal_user_id)
             ->orderBy('updated_at', 'desc')
             ->limit(100)
-            ->offset(2)
-            ->get();
+            ->offset(2);
 
-        Log::info($result_row);
+        Log::info($result_row->get());
 
         $deleted = $result_row->delete();
 //        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
