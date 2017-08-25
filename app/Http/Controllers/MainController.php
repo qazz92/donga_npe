@@ -120,8 +120,8 @@ class MainController extends Controller
         if ($result_row->isEmpty()){
             Log::info("값 비었드");
         } else {
-            Log::info($result_row);
-            $deleted = DB::table('devices')->whereIn('id', $result_row)->delete();
+            Log::info($result_row["id"]);
+            $deleted = DB::table('devices')->whereIn('id', $result_row["id"])->delete();
 //            $deleted = Device::whereIn('id', $result_row)->delete();
 //        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
 //        $result_row = DB::delete(DB::raw("DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id=".$normal_user_id." ORDER BY updated_at DESC LIMIT 100 OFFSET 1)"));
