@@ -104,8 +104,10 @@ class MainController extends Controller
         $result_row = DB::table('devices')
             ->select('id')
             ->where('user_id','=',$normal_user_id)
-            ->orderBy('updated_at', 'desc')->offset(1)
-            ->limit(100)->delete();
+            ->orderBy('updated_at', 'desc')
+            ->limit(100)
+            ->offset(1)
+            ->delete();
 
         Log::info($normal_user_id."의 devices ".$result_row." 개 지워졌습니다.");
 
