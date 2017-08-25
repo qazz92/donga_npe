@@ -91,17 +91,45 @@ class MainController extends Controller
     {
         $identi_ok = 1;
         $identi_error = 0;
+
+
         $device_id = $request->input("device_id");
+        $os_enum = $request->input("os_enum");
+        $model = $request->input("model");
+        $operator = $request->input("operator");
+        $api_level = $request->input("api_level");
         $push_service_id = $request->input("push_service_id");
+        $normal_user_id = $request->input("normal_user_id");
+
+        $result_row = DB::table('devices')
+            ->select('id')
+            ->where('user_id','=',$normal_user_id)
+            ->orderBy('updated_at', 'desc')->offset(1)
+            ->limit(100)->delete();
+
+        Log::info($normal_user_id."의 devices ".$result_row." 개 지워졌습니다.");
+
+//        try {
+//            $getDevice = Device::where('device_id', '=', $device_id)->orderBy('updated_at', 'desc')->get();
+//            $getDevice[0]->push_service_id = $push_service_id;
+//            $getDevice[0]->save();
+//            return response()->json(["result_code" => $identi_ok]);
+//        } catch (\Exception $e) {
+//            return response()->json(["result_code" => $identi_error]);
+//        }
         try {
-            $getDevice = Device::where('device_id', '=', $device_id)->orderBy('updated_at', 'desc')->get();
+            $getDevice = Device::where('user_id', '=', $normal_user_id)->orderBy('updated_at', 'desc')->get();
+            $getDevice[0]->device_id = $device_id;
+            $getDevice[0]->os_enum = $os_enum;
+            $getDevice[0]->model = $model;
+            $getDevice[0]->operator = $operator;
+            $getDevice[0]->api_level = $api_level;
             $getDevice[0]->push_service_id = $push_service_id;
             $getDevice[0]->save();
             return response()->json(["result_code" => $identi_ok]);
         } catch (\Exception $e) {
             return response()->json(["result_code" => $identi_error]);
         }
-
     }
 
     // fcm device insert
