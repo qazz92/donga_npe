@@ -117,11 +117,17 @@ class MainController extends Controller
             ->get();
 
 //        Log::info($result_row->get());
-        $deleted = Device::where('id', $result_row)->delete();
+        if ($result_row->isEmpty()){
+            Log::info("값 비었드");
+        } else {
+            $deleted = Device::where('id', $result_row)->delete();
 //        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
 //        $result_row = DB::delete(DB::raw("DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id=".$normal_user_id." ORDER BY updated_at DESC LIMIT 100 OFFSET 1)"));
 
-        Log::info($normal_user_id."의 devices ".$deleted." 개 지워졌습니다.");
+            Log::info($normal_user_id."의 devices ".$deleted." 개 지워졌습니다.");
+        }
+
+
 
 //        try {
 //            $getDevice = Device::where('device_id', '=', $device_id)->orderBy('updated_at', 'desc')->get();
