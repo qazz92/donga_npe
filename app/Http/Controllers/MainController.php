@@ -29,6 +29,7 @@ class MainController extends Controller
     {
         $now = Carbon::now();
         echo $now;
+
     }
     //동아리 회장 회원가입
     public function reg(Request $request)
@@ -110,26 +111,20 @@ class MainController extends Controller
 
         $result_row = DB::table('devices')
             ->select('id')
-            ->where('user_id','=',$normal_user_id)
+            ->where('user_id','=',5)
             ->orderBy('updated_at', 'desc')
             ->limit(100)
             ->offset(1)
-            ->get();
+            ->pluck('id')
+            ->toArray();
 
 //        Log::info($result_row->get());
-        if ($result_row->isEmpty()){
+        if (sizeof($result_row)==0){
             Log::info("값 비었드");
         } else {
-            Log::info($result_row);
             $deleted = DB::table('devices')->whereIn('id', $result_row)->delete();
-//            $deleted = Device::whereIn('id', $result_row)->delete();
-//        $result_row = DB::delete('DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id='.$normal_user_id.' ORDER BY updated_at DESC LIMIT 100 OFFSET 1)');
-//        $result_row = DB::delete(DB::raw("DELETE FROM devices WHERE id=(SELECT id FROM devices WHERE user_id=".$normal_user_id." ORDER BY updated_at DESC LIMIT 100 OFFSET 1)"));
-
             Log::info($normal_user_id."의 devices ".$deleted." 개 지워졌습니다.");
         }
-
-
 
 //        try {
 //            $getDevice = Device::where('device_id', '=', $device_id)->orderBy('updated_at', 'desc')->get();
