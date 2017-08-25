@@ -112,7 +112,8 @@ class MainController extends Controller
             ->where('user_id','=',$normal_user_id)
             ->orderBy('updated_at', 'desc')
             ->limit(100)
-            ->offset(2);
+            ->offset(2)
+            ->get();
 
         Log::info($result_row);
 
