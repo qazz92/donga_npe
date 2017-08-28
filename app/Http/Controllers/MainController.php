@@ -120,7 +120,7 @@ class MainController extends Controller
 
 //        Log::info($result_row->get());
         if (sizeof($result_row)==0){
-            Log::info("값 비었드");
+            Log::info($normal_user_id." 의 디바이스는 1개입니다.");
         } else {
             $deleted = DB::table('devices')->whereIn('id', $result_row)->delete();
             Log::info($normal_user_id."의 devices ".$deleted." 개 지워졌습니다.");
