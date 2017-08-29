@@ -59,6 +59,7 @@ $app->group(['middleware' => 'auth:api'], function($app)
     $app->get('/getPNormalNotis','AdminController@getPNormalNotis');
     $app->get('/getPCircleNotis','AdminController@getPCircleNotis');
     $app->get('/adminCircleNotis','AdminController@admin_getCircleNotis');
+    $app->post('/total/fcm','AdminController@total_fcm');
 });
 
 $app->POST('/auth/login', 'AuthController@loginPost');

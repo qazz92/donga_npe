@@ -111,7 +111,7 @@ class MainController extends Controller
 
         $result_row = DB::table('devices')
             ->select('id')
-            ->where('user_id','=',5)
+            ->where('user_id','=',$normal_user_id)
             ->orderBy('updated_at', 'desc')
             ->limit(100)
             ->offset(1)
