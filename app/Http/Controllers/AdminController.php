@@ -54,44 +54,51 @@ class AdminController extends Controller
         $title = $article["title"];
         $contents = $article["contents"];
         $os_enum = $request->input("os_enum");
-        try {
-            $to = DB::table('devices')
-                ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
-                ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
-                ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-                ->where('normal_users.push_permit', '=', 0)
-                ->where('devices.os_enum', '=', $os_enum)
-                ->pluck('pid', 'uid')->toArray();
-        } catch (QueryException $e){
-            return response()->json([
-                'result_code' => 500
-            ]);
-        }
-        if (!empty($to)) {
-            $message = ['contents' => $article,'category'=>'total'];
-            try {
-                $fcm->to(array_values($to))->notification("BOO",$title)->data($message)->send();
-            } catch (\Exception $e) {
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-            try {
-                $pubNotice = new PublicNotice();
-                $pubNotice->title = $title;
-                $pubNotice->contents = $contents;
-                $pubNotice->save();
 
-
-                return response()->json([
-                    'result_code' => 1
-                ]);
-            } catch (QueryException $e){
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
+        $isAll = strcmp($os_enum, "ALL");
+        if ($isAll){
+            echo "다름";
+        } else {
+            echo "같음";
         }
+//        try {
+//            $to = DB::table('devices')
+//                ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
+//                ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
+//                ->select('normal_users.id as uid', 'devices.push_service_id as pid')
+//                ->where('normal_users.push_permit', '=', 0)
+//                ->where('devices.os_enum', '=', $os_enum)
+//                ->pluck('pid', 'uid')->toArray();
+//        } catch (QueryException $e){
+//            return response()->json([
+//                'result_code' => 500
+//            ]);
+//        }
+//        if (!empty($to)) {
+//            $message = ['contents' => $article,'category'=>'total'];
+//            try {
+//                $fcm->to(array_values($to))->notification("BOO",$title)->data($message)->send();
+//            } catch (\Exception $e) {
+//                return response()->json([
+//                    'result_code' => 500
+//                ]);
+//            }
+//            try {
+//                $pubNotice = new PublicNotice();
+//                $pubNotice->title = $title;
+//                $pubNotice->contents = $contents;
+//                $pubNotice->save();
+//
+//
+//                return response()->json([
+//                    'result_code' => 1
+//                ]);
+//            } catch (QueryException $e){
+//                return response()->json([
+//                    'result_code' => 500
+//                ]);
+//            }
+//        }
     }
 
     public function normal_fcm(Request $request, FCMHandler $fcm)
