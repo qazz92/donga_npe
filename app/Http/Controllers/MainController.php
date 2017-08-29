@@ -162,7 +162,7 @@ class MainController extends Controller
         $api_level = $request->input("api_level");
         $push_service_id = $request->input("push_service_id");
         $normal_user_id = $request->input("normal_user_id");
-        $getDevice = Device::where('device_id', '=', $device_id)->get();
+        $getDevice = Device::where('user_id', '=', $normal_user_id)->get();
         if ($getDevice->isEmpty()) {
             try {
                 $device = new Device();
@@ -186,7 +186,12 @@ class MainController extends Controller
                 return response()->json(["result_code" => $identi_error]);
             }
         } else {
-            Log::info("OLD : " . $getDevice[0]->push_service_id.'| NEW : '.$push_service_id);
+            Log::info($normal_user_id." 의 디바이스가 이미 존재하므로 업데이트 시작합니다.");
+            $getDevice[0]->device_id = $device_id;
+            $getDevice[0]->os_enum = $os_enum;
+            $getDevice[0]->model = $model;
+            $getDevice[0]->operator = $operator;
+            $getDevice[0]->api_level = $api_level;
             $getDevice[0]->push_service_id = $push_service_id;
             $getDevice[0]->save();
             return response()->json(["result_code" => $identi_exist]);
