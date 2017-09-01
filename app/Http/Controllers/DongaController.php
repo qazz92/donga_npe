@@ -272,6 +272,13 @@ class DongaController extends Controller
             return response()->json(array('result_code'=>0));
         }
     }
+
+    public function getGraduatedTest()
+    {
+        $cached = Redis::get('getGraduated_1436446');
+        return response()->json(json_decode($cached));
+    }
+
     public function getGraduated(Request $request, GetDonga $getDonga)
     {
         $stiId = $request->input('stuId');
