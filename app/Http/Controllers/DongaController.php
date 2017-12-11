@@ -65,52 +65,6 @@ class DongaController extends Controller
 
     public function dongaUnivLogin(Request $request, GetDonga $getDonga)
     {
-//        $stuId = $request->input('stuId');
-//        $getID = Normal_User::where('stuId', '=', $stuId)->get();
-//        if ($getID->isEmpty()){
-//            $loginPage = 'https://student.donga.ac.kr/Login.aspx';
-//            $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
-//            if ($result["result_code"] == 1) {
-//                $targetPage = 'https://student.donga.ac.kr/Univ/SUD/SSUD0000.aspx?m=1';
-//                $user_id = $result["user_id"];
-//                $client = $result["client"];
-//                $crawlerTable = $client->request('GET', $targetPage);
-//                try {
-//                    $infoTable = $crawlerTable->filter('table#Table4')->filter('tr');
-//                    $name = $infoTable->eq(0)->filter('td')->eq(2)->filter('span#lblKorNm')->text();
-//                    $coll = $infoTable->eq(1)->filter('span#lblCollegeNm')->text();
-//                    $major = $infoTable->eq(2)->filter('span#lblDeptNm')->text();
-//                    $user = new Normal_User();
-//                        try {
-//                            $user->stuId = $user_id;
-//                            $user->name = $name;
-//                            $user->coll = $coll;
-//                            $user->major = $major;
-//                            $result = $user->save();
-//                            if ($result) {
-//                                return response()->json(["result_code" => 1, "result_body" => $user]);
-//                            } else {
-//                                return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
-//                            }
-//                        } catch (\Exception $e) {
-//                            return response()->json(["result_code" => 0, "result_body" => "DB 에러!"]);
-//                        }
-//                } catch (\Exception $e) {
-//                    $fail = $result["page"]->filter("span#lblError")->text();
-//                    if (str_contains($fail,"학번")){
-//                        $result_code = 3;
-//                    }
-//                    else {
-//                        $result_code = 500;
-//                    }
-//                    return response()->json(array('result_code' => $result_code));
-//                }
-//            } else {
-//            return response()->json(["result_code" => $result["result_code"]]);
-//            }
-//        } else {
-//            return response()->json(array("result_code" => 1, "result_body" => $getID[0]));
-//        }
         $loginPage = 'https://student.donga.ac.kr/Login.aspx';
         $result = $getDonga->getUserInfo($request)->getDongaPage($loginPage);
         if ($result["result_code"] == 1) {
@@ -154,136 +108,12 @@ class DongaController extends Controller
         }
     }
 
-    public function removeCircle(Request $request){
-        $ids = $request->input('targets');
-        try {
-            $result = User_Circle::destroy($ids);
-            if ($result>0){
-                $olds = $request->input('olds');
 
-            }
-            return response()->json(array('result_code'=>1,'result_body'=>$result));
-        } catch (QueryException $e){
-            return response()->json(array("result_code" => 500));
-        } catch (\Exception $e){
-            return response()->json(array('result_code'=>0));
-        }
-    }
-    public function checkCircle(Request $request){
-        $user_id = $request->input('user_id');
-        try {
-            $check = User_Circle::where('user_id','=',$user_id)->get();
-
-
-            if ($check->isEmpty()){
-                return response()->json(array('result_code'=>0));
-            } else {
-                return response()->json(array('result_code'=>1,'result_body'=>$check));
-            }
-        } catch (QueryException $e) {
-            return response()->json(array('result_code'=>500));
-        }
-
-    }
-    public function getCircle(Request $request){
-        $major = $request->input('major');
-       try {
-           $circles = Circle::where('major','=',$major)->get();
-           if ($circles->isEmpty()){
-               return response()->json(array('result_code'=>500));
-           }
-           return response()->json(array('result_code'=>1,'result_body'=>$circles));
-       } catch (QueryException $e){
-           return response()->json(array('result_code'=>500));
-       } catch (\Exception $e){
-           return response()->json(array('result_code'=>0));
-       }
-    }
-    public function setCircle(Request $request){
-        $user_id = $request->input('user_id');
-        $circles = $request->input('circles');
-//        $circle_id = $request->input('circle_id');
-        try {
-            foreach ($circles as $circle){
-                $setCircle = new User_Circle();
-                $setCircle->user_id = $user_id;
-                $setCircle->circle_id = $circle;
-                $setCircle->save();
-            }
-            return response()->json(array('result_code'=>1));
-        } catch (QueryException $e) {
-            return response()->json(array('result_code'=>500));
-        } catch (\Exception $e){
-            Log::info($e);
-            return response()->json(array('result_code'=>0));
-        }
-
-    }
-    public function getUserCircle(Request $request){
-        $user_id = $request->input('user_id');
-        try {
-            $result =
-                DB::table('user_circles')
-                ->join('circles','circles.id','user_circles.circle_id')
-                ->select('circles.id as id','circles.name as name')
-                ->where('user_circles.user_id','=',$user_id)
-                ->get();
-            return response()->json(array('result_code'=>1,'result_body'=>$result));
-        } catch (QueryException $e){
-            echo $e;
-//            return response()->json(array('result_code'=>500));
-        } catch (\Exception $e){
-            return response()->json(array('result_code'=>0));
-        }
-    }
-    public function updateCircle(Request $request){
-        $user_id = $request->input('user_id');
-//        $olds  = $request->input('olds');
-        $news = $request->input('news');
-
-        try {
-            $result = User_Circle::where('user_id',$user_id)->delete();
-            if ($result>0){
-                foreach ($news as $new){
-                    $setCircle = new User_Circle();
-                    $setCircle->user_id = $user_id;
-                    $setCircle->circle_id = $new;
-                    $setCircle->save();
-                }
-            }
-            return response()->json(array('result_code'=>1));
-        } catch (QueryException $e){
-            return response()->json(array('result_code'=>500));
-        } catch (\Exception $e){
-            return response()->json(array('result_code'=>0));
-        }
-    }
-    public function setNoneCircle(Request $request){
-        $user_id = $request->input('user_id');
-        try {
-            $setCircle = new User_Circle();
-            $setCircle->user_id = $user_id;
-            $setCircle->circle_id = 8;
-            $setCircle->save();
-            return response()->json(array('result_code'=>1));
-        } catch (QueryException $e) {
-            return response()->json(array('result_code'=>500));
-        } catch (\Exception $e){
-            return response()->json(array('result_code'=>0));
-        }
-    }
-
-    public function getGraduatedTest()
-    {
-        $cached = Redis::get('getGraduated_1436446');
-        return response()->json(json_decode($cached));
-    }
 
     public function getGraduated(Request $request, GetDonga $getDonga)
     {
         $stiId = $request->input('stuId');
         $cached = Redis::get('getGraduated_'.$stiId);
-//        $cached = Cache::get('getGraduated_'.$stiId);
         if ($cached != null){
             Log::info('GRA CACHED');
             return response()->json(json_decode($cached));
@@ -340,8 +170,6 @@ class DongaController extends Controller
                     $result = array('result_code' => 1, 'result_body' => array('info' => $info, 'title' => $title, 'title2' => $title2, 'need' => $need,
                         'get' => $get, 'pm' => $pm));
                     Redis::set('getGraduated_' . $user_id, json_encode($result));
-//                    $expiresAt = Carbon::now()->addMinutes(60);
-//                    Cache::put('getGraduated_' . $user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
                     $fail = $result["page"]->filter("span#lblError")->text();
@@ -380,8 +208,6 @@ class DongaController extends Controller
                 try {
                     $result = $getDonga->getGrade($crawlerTable, 8);
                     Redis::set('getAllGrade_' . $user_id, json_encode($result));
-//                    $expiresAt = Carbon::now()->addMinutes(60);
-//                    Cache::put('getAllGrade_' . $user_id, $result, $expiresAt);
                     return response()->json($result);
                 } catch (\Exception $e) {
                     $fail = $result["page"]->filter("span#lblError")->text();
@@ -486,68 +312,6 @@ class DongaController extends Controller
                 return response()->json(["result_code" => $result["result_code"]]);
             }
         }
-
-//        $user_id = $request->input('stuId');
-//        $user_pw = $request->input('stuPw');
-//        $client = new \Goutte\Client();
-//        $guzzleClient = new \GuzzleHttp\Client(array(
-//            'timeout' => 90,
-//            'verify' => false,
-//        ));
-//        $client->setClient($guzzleClient);
-//        $crawlerLogin = $client->request('GET', 'https://sugang.donga.ac.kr/login.aspx');
-//        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-//        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
-//        $cookies = $client->getCookieJar()->all();
-//        $client->getCookieJar()->set($cookies[0]);
-//        try {
-//            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGPRT.aspx');
-//            $cached = Cache::get('getTimeTable_' . $user_id);
-//            if ($cached == null) {
-//                $arr = array();
-//                $crawlerTable->filter('table#reglisthead')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-//                    if ($i>10){
-//                        $arr[] = trim($node->text());
-//                    }
-//                });
-//                $chArr = array_chunk($arr, 10);
-//                $expiresAt = Carbon::now()->addMinutes(60);
-//                Cache::put('getTimeTable_' . $user_id, $chArr, $expiresAt);
-//                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
-//            } else {
-//                return response()->json(array('result_code' => 1, 'result_body' => $cached));
-//            }
-//        }catch (\Exception $e){
-//            return response()->json(array('result_code' => 500));
-//        }
-//
-//        $user_id = $request->input('stuId');
-//        $user_pw = $request->input('stuPw');
-//        $client = new \Goutte\Client();
-//        $guzzleClient = new \GuzzleHttp\Client(array(
-//            'timeout' => 90,
-//            'verify' => false,
-//        ));
-//        $client->setClient($guzzleClient);
-//        $crawlerLogin = $client->request('GET', 'https://sugang.donga.ac.kr/login.aspx');
-//        $form = $crawlerLogin->selectButton('ibtnLogin')->form();
-//        $crawler = $client->submit($form, array('txtStudentCd' => $user_id, 'txtPasswd' => $user_pw));
-//        $cookies = $client->getCookieJar()->all();
-//        $client->getCookieJar()->set($cookies[0]);
-//        try {
-//            $crawlerTable = $client->request('GET', 'http://sugang.donga.ac.kr/SUGANGPRT.aspx');
-//            echo $crawlerTable->html();
-////                $arr = array();
-////                $crawlerTable->filter('table#reglisthead')->filter('tr')->filter('td')->each(function ($node, $i) use (&$arr) {
-////                    if ($i>10){
-////                        $arr[] = trim($node->text());
-////                    }
-////                });
-////                $chArr = array_chunk($arr, 10);
-////                return response()->json(array('result_code' => 1, 'result_body' => $chArr));
-//        }catch (\Exception $e){
-//           echo $e;
-//        }
     }
 
     //클래스 획득
@@ -597,8 +361,6 @@ class DongaController extends Controller
                     });
                 for ($i=1;$i<count($arr);$i++){
                     if ($arr[$i]===" "){
-//                        echo $i." 빈 강의실<br/>";
-//                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>"빈 강의실","subject_name"=>"빈 강의실","room_id"=>$room->id));
                         file_put_contents('/Users/qazz92/test2.txt',$auto.','.$j.','.$i.','.'빈 강의실,빈 강의실,'.$room->id.';',FILE_APPEND);
                         $auto = $auto + 1;
                     }else {
@@ -606,8 +368,6 @@ class DongaController extends Controller
                         $splitNo = str_replace('&nbsp'," ",$removeRoom);
                         $splitNo = preg_replace('/^([^\s]+)\s/','$1,',$splitNo);
                         $finalResult = explode(',',$splitNo);
-//                        echo $i.' '.$finalResult[0].'  |   '.$finalResult[1].'<br/>';
-//                        TimeTable::create(array("day"=>$j,"time"=>$i,"subject_code"=>$finalResult[0],"subject_name"=>$finalResult[1],"room_id"=>$room->id));
                         file_put_contents('/Users/qazz92/test2.txt',$auto.','.$j.','.$i.','.$finalResult[0].','.$finalResult[1].','.$room->id.';',FILE_APPEND);
                         $auto = $auto + 1;
                     }
@@ -620,7 +380,6 @@ class DongaController extends Controller
     // 빈강의실
     public function getEmptyRoom(Request $request)
     {
-//        $results = DB::select( DB::raw('SELECT b.room_no as room_no FROM timeTables a LEFT JOIN rooms b ON a.room_id = b.id WHERE a.day=1 AND (a.time BETWEEN 3 and 5) AND a.subject_code=\'빈 강의실\' GROUP BY a.room_id HAVING count(*)=3') );
         $day = intval($request->input("day"));
         $from = intval($request->input("from"));
         $to = intval($request->input("to"));

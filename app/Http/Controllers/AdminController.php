@@ -30,7 +30,40 @@ class AdminController extends Controller
     {
         //
     }
-    //
+    //동아리 회장 회원가입
+    public function reg(Request $request)
+    {
+        $identi_ok = 1;
+        $identi_error = 0;
+        $identi_exist = 2;
+        $email = $request->input("email");
+        $pw = $request->input("password");
+        $circle_id = $request->input('circle_id');
+        if (User::where('email', '=', $email)->get()->isEmpty()) {
+            try {
+                $user = new User();
+                $user->email = $email;
+                $user->password = app('hash')->make($pw);
+                $user->circle_id = $circle_id;
+                $result = $user->save();
+                if ($result) {
+                    return response()->json(["result_code" => $identi_ok]);
+                } else {
+//                    echo $result;
+                    return response()->json(["result_code" => $identi_error]);
+                }
+            } catch (\Exception $e) {
+//                Log::info("USER INSERT ERROR !! : " . $e);
+//                echo $e;
+                return response()->json(["result_code" => $identi_error]);
+            }
+        } else {
+            Log::info("이미 존재합니다. !!");
+            return response()->json(["result_code" => $identi_exist]);
+        }
+
+    }
+    // 현재 동아리 회원 보기
     public function getMembers(){
         try{
             $circle_id = Auth::user()["circle_id"];
@@ -48,269 +81,5 @@ class AdminController extends Controller
         }
     }
 
-    public function total_fcm(Request $request, FCMHandler $fcm)
-    {
-        $article = $request->input('article');
-        $title = $article["title"];
-        $contents = $article["contents"];
-        $os_enum = $request->input("os_enum");
-        $isAll = strcmp($os_enum, "ALL");
-        if ($isAll){
-            try {
-                $to = DB::table('devices')
-                    ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
-                    ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
-                    ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-                    ->where('normal_users.push_permit', '=', 0)
-                    ->where('devices.os_enum', '=', $os_enum)
-                    ->pluck('pid', 'uid')->toArray();
-            } catch (QueryException $e){
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-        } else {
-            try {
-                $to = DB::table('devices')
-                    ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
-                    ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
-                    ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-                    ->where('normal_users.push_permit', '=', 0)
-                    ->pluck('pid', 'uid')->toArray();
-            } catch (QueryException $e){
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-        }
-//        try {
-//            $to = DB::table('devices')
-//                ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
-//                ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
-//                ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-//                ->where('normal_users.push_permit', '=', 0)
-//                ->where('devices.os_enum', '=', $os_enum)
-//                ->pluck('pid', 'uid')->toArray();
-//        } catch (QueryException $e){
-//            return response()->json([
-//                'result_code' => 500
-//            ]);
-//        }
-        if (!empty($to)) {
-            $message = ['contents' => $article,'category'=>'total'];
-            try {
-                $fcm->to(array_values($to))->notification("BOO",$title)->data($message)->send();
-            } catch (\Exception $e) {
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-            try {
-                $pubNotice = new PublicNotice();
-                $pubNotice->title = $title;
-                $pubNotice->contents = $contents;
-                $pubNotice->save();
-
-
-                return response()->json([
-                    'result_code' => 1
-                ]);
-            } catch (QueryException $e){
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-        }
-    }
-
-    public function normal_fcm(Request $request, FCMHandler $fcm)
-    {
-        $article = $request->input('article');
-        $title = $article["title"];
-        $body = $article["body"];
-        $contents = $article["contents"];
-
-        try {
-            $circle_id = Auth::user()["circle_id"];
-            $admin_id = Auth::user()["id"];
-        } catch (UnauthorizedException $e) {
-            return response()->json([
-                'result_code' => 0
-            ]);
-        }
-        try {
-            $to = DB::table('devices')
-                ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
-                ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
-                ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-                ->where('normal_users.push_permit', '=', 0)
-                ->where('user_circles.circle_id', '=', $circle_id)
-                ->pluck('pid', 'uid')->toArray();
-        } catch (QueryException $e){
-            return response()->json([
-                'result_code' => 500
-            ]);
-        }
-        if (!empty($to)) {
-            $message = ['contents' => $article,'category'=>'normal'];
-        try {
-//            $fcm->to(array_values($to))->notification($title, $body)->data($message)->send();
-            $fcm->to(array_values($to))->notification($title,$body)->data($message)->send();
-        } catch (\Exception $e) {
-            return response()->json([
-                'result_code' => 500
-            ]);
-        }
-        try {
-            $pnotis = new Pnoti();
-            $pnotis->admin_id = $admin_id;
-            $pnotis->title = $title;
-            $pnotis->body = $body;
-            $pnotis->data = $contents;
-            $pnotis->save();
-
-            $path = storage_path('app/notis/');
-            $text = $path . date("Y-m-d h:i:s") . '_' . str_random(16) . '.txt';
-            $ids = array_keys($to);
-            foreach ($ids as $id) {
-                $mytime = Carbon::now();
-                $file_contents = $id . '|'.$pnotis['id'].'|'.$mytime->toDateTimeString() .'|0'. ';';
-                file_put_contents($text, $file_contents, FILE_APPEND);
-            }
-            $query = "LOAD DATA LOCAL INFILE '" . $text . "'
-            INTO TABLE notis
-            FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pnotis_id ,created_at, read_check) SET id = NULL;";
-            DB::connection()->getpdo()->exec($query);
-            return response()->json([
-                'result_code' => 1
-            ]);
-        } catch (QueryException $e){
-            return response()->json([
-                'result_code' => 500
-            ]);
-        }
-        }
-    }
-    //fcm push
-    public function circle_fcm(Request $request, FCMHandler $fcm)
-    {
-        $article = $request->input('article');
-        $title = $article["title"];
-        $body = $article["body"];
-        $contents = $article["contents"];
-        try {
-            $circle_id = Auth::user()["circle_id"];
-            $admin_id = Auth::user()["id"];
-        } catch (AuthenticationException $e){
-            return response()->json([
-                'result_code' => 0
-            ]);
-        }
-        try {
-            $to = DB::table('devices')
-                ->join('normal_users', 'normal_users.id', '=', 'devices.user_id')
-                ->join('user_circles', 'normal_users.id', '=', 'user_circles.user_id')
-                ->select('normal_users.id as uid', 'devices.push_service_id as pid')
-                ->where('normal_users.push_permit', '=', 0)
-                ->where('user_circles.circle_id', '=', $circle_id)
-                ->pluck('pid', 'uid')->toArray();
-        } catch (QueryException $e){
-//            echo $e;
-            return response()->json([
-                'result_code' => 500
-            ]);
-        }
-        if (!empty($to)) {
-            $message = ['contents' => $article,'category'=>'circle'];
-
-            try {
-                $fcm->to(array_values($to))->notification($title,$body)->data($message)->send();
-            } catch (\Exception $e){
-//                echo $e;
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-
-            try {
-                $pcnotis = new PCircle_Noti();
-                $pcnotis->admin_id = $admin_id;
-                $pcnotis->title = $title;
-                $pcnotis->body = $body;
-                $pcnotis->data = $contents;
-                $pcnotis->save();
-
-                $path = storage_path('app/cnotis/');
-                $text = $path . date("Y-m-d h:i:s") . '_' . str_random(16) . '.txt';
-                $ids = array_keys($to);
-                foreach ($ids as $id) {
-                    $mytime = Carbon::now();
-                    $file_contents = $id . '|'.$pcnotis['id'].'|0|'.$mytime->toDateTimeString() .'|0'.';';
-                    file_put_contents($text, $file_contents, FILE_APPEND);
-                }
-                $query = "LOAD DATA LOCAL INFILE '" . $text . "'
-            INTO TABLE circle_notis
-            FIELDS TERMINATED BY '|' LINES TERMINATED BY ';'
-            (user_id, pcircle_notis_id , check_att , created_at, read_check) SET id = NULL;";
-                DB::connection()->getpdo()->exec($query);
-                return response()->json([
-                    'result_code' => 1
-                ]);
-            } catch (\Exception $e){
-//                echo $e;
-                return response()->json([
-                    'result_code' => 500
-                ]);
-            }
-        }
-    }
-
-
-    public function getPNormalNotis(){
-        try{
-            $admin_id = Auth::user()["id"];
-            $pnotis = Pnoti::where('admin_id','=',$admin_id)->orderBy('created_at','desc')->get();
-            return response()->json(array('result_code'=>1,'result_body'=>$pnotis));
-        } catch (QueryException $e){
-            return response()->json(array('result_code'=>500));
-        }
-    }
-    public function getPCircleNotis(){
-        try {
-            $admin_id = Auth::user()["id"];
-            $pcnotis = PCircle_Noti::where('admin_id','=',$admin_id)->orderBy('created_at','desc')->get();
-            return response()->json(array('result_code'=>1,'result_body'=>$pcnotis));
-        } catch (QueryException $e) {
-            return response()->json(array('result_code'=>500));
-        }
-    }
-    public function admin_getCircleNotis(Request $request){
-        try {
-            $pcnotis_id = $request->input('pcnotis_id');
-//            $pcnotis = Circle_Noti::where('pcircle_notis_id','=',$pcnotis_id)->get();
-
-            $pcnotis = DB::table('circle_notis')
-                ->join('normal_users', 'normal_users.id', '=', 'circle_notis.user_id')
-                ->select('normal_users.stuId as stuId','normal_users.name as name','circle_notis.check_att as att')
-                ->where('circle_notis.pcircle_notis_id', '=', $pcnotis_id)
-                ->get();
-
-            return response()->json(array('result_code'=>1,'result_body'=>$pcnotis));
-        } catch (QueryException $e){
-            return response()->json(array('result_code'=>500));
-        }
-    }
-    public function removePmk(){
-        try {
-            $result = User_Circle::destroy(5);
-            return response()->json(array('result_code'=>1,'result_body'=>$result));
-        } catch (QueryException $e) {
-            return response()->json(array('result_code'=>500));
-        } catch (\Exception $e){
-            return response()->json(array('result_code'=>0));
-        }
-
-    }
 
 }
