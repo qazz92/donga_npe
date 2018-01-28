@@ -8,11 +8,11 @@ use App\Services\GetDonga;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use App\Normal_User;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
-use Log;
 use App\Room;
 use App\User_Circle;
 
@@ -148,7 +148,7 @@ class DongaController extends Controller
 
                     });
                     $crawlerTable->filter('table#printtable')
-                        ->filter('tr')->filter('table.xTBL1')->eq(1)
+                        ->filter('tr')->filter('table.xTBL1')->eq(2)
                         ->filter('tr')->filter('td')->each(function ($node, $i) use (&$title, &$title2, &$need, &$get, &$pm) {
                             if ($i < 6) {
                                 if ($i === 4) {
